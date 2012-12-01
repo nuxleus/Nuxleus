@@ -1,1 +1,1 @@
-[assembly: WebActivator.PreApplicationStartMethod(typeof(ServiceStack.Plugins.ProtoBuf.AppStart), "Start")]
+//[assembly: WebActivator.PreApplicationStartMethod(typeof(ServiceStack.Plugins.ProtoBuf.AppStart), "Start")]

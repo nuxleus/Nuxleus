@@ -6,11 +6,13 @@ namespace Nuxleus.Utility.Format
 {
     public class Base64FormatProvider : ICustomFormatter, IFormatProvider
     {
-        public Base64FormatProvider() { }
+        public Base64FormatProvider ()
+        {
+        }
 
-        Encoding encode = new UTF8Encoding();
+        Encoding encode = new UTF8Encoding ();
 
-        public object GetFormat(Type formatType)
+        public object GetFormat (Type formatType)
         {
             if (formatType == typeof(ICustomFormatter))
                 return this;
@@ -18,13 +20,14 @@ namespace Nuxleus.Utility.Format
                 return null;
         }
 
-        public string Format(string format, object arg, IFormatProvider formatProvider)
+        public string Format (string format, object arg, IFormatProvider formatProvider)
         {
             if (format != null)
-                return Convert.ToBase64String(encode.GetBytes(format.ToCharArray()));
+                return Convert.ToBase64String (encode.GetBytes (format.ToCharArray ()));
             else if (arg != null)
-                return ((IFormattable)arg).ToString(format, formatProvider);
-            else return null;
+                return ((IFormattable) arg).ToString (format, formatProvider);
+            else
+                return null;
         }
     }
 }

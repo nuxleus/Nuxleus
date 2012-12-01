@@ -88,13 +88,13 @@
       <HintPath>packages\ServiceStack.Logging.Log4Net.1.0.3.0\lib\net35\ServiceStack.Logging.Log4Net.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\..\packages\ServiceStack.Text.3.7.6\lib\net35\ServiceStack.Text.dll</HintPath>
+      <HintPath>packages\ServiceStack.Text.3.7.9\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="SgmlReaderDll">
       <HintPath>packages\SgmlReader.1.8.8\lib\4.0\SgmlReaderDll.dll</HintPath>
     </Reference>
     <Reference Include="Simple.Data">
-      <HintPath>packages\Simple.Data.Core.0.16.1.0\lib\net40\Simple.Data.dll</HintPath>
+      <HintPath>packages\Simple.Data.Core.0.16.2.1\lib\net40\Simple.Data.dll</HintPath>
     </Reference>
     <Reference Include="Simple.Data.MongoDB">
       <HintPath>packages\Simple.Data.MongoDB.0.12.0.1\lib\net40\Simple.Data.MongoDB.dll</HintPath>
@@ -153,7 +153,7 @@
       <HintPath>..\lib\Yahoo.Yui.Compressor.dll</HintPath>
     </Reference>
     <Reference Include="AWSSDK">
-      <HintPath>..\..\..\packages\AWSSDK.1.4.10.0\lib\AWSSDK.dll</HintPath>
+      <HintPath>packages\AWSSDK.1.4.10.0\lib\AWSSDK.dll</HintPath>
     </Reference>
     <Reference Include="Enyim.Caching">
       <HintPath>packages\Membase.2.14\lib\net35\Enyim.Caching.dll</HintPath>
@@ -167,24 +167,23 @@
     <Reference Include="log4net">
       <HintPath>packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.Infrastructure" />
     <Reference Include="MongoDB.Bson">
-      <HintPath>..\..\..\packages\mongocsharpdriver.1.4.2\lib\net35\MongoDB.Bson.dll</HintPath>
+      <HintPath>packages\mongocsharpdriver.1.4.2\lib\net35\MongoDB.Bson.dll</HintPath>
     </Reference>
     <Reference Include="MongoDB.Driver">
-      <HintPath>..\..\..\packages\mongocsharpdriver.1.4.2\lib\net35\MongoDB.Driver.dll</HintPath>
+      <HintPath>packages\mongocsharpdriver.1.4.2\lib\net35\MongoDB.Driver.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
       <HintPath>..\..\..\packages\Newtonsoft.Json.4.5.5\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack">
-      <HintPath>..\..\..\packages\ServiceStack.3.7.7\lib\net35\ServiceStack.dll</HintPath>
+      <HintPath>packages\ServiceStack.3.7.9\lib\net35\ServiceStack.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\..\packages\ServiceStack.Common.3.7.7\lib\net35\ServiceStack.Common.dll</HintPath>
+      <HintPath>packages\ServiceStack.Common.3.7.9\lib\net35\ServiceStack.Common.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\..\packages\ServiceStack.Common.3.7.7\lib\net35\ServiceStack.Interfaces.dll</HintPath>
+      <HintPath>packages\ServiceStack.Common.3.7.9\lib\net35\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.OrmLite">
       <HintPath>..\..\..\packages\ServiceStack.OrmLite.SqlServer.3.7.6\lib\ServiceStack.OrmLite.dll</HintPath>
@@ -196,13 +195,31 @@
       <HintPath>packages\ServiceStack.Plugins.ProtoBuf.3.6.9\lib\net35\ServiceStack.Plugins.ProtoBuf.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.RazorEngine">
-      <HintPath>..\..\..\packages\ServiceStack.3.7.7\lib\net35\ServiceStack.RazorEngine.dll</HintPath>
+      <HintPath>packages\ServiceStack.3.7.9\lib\net35\ServiceStack.RazorEngine.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Redis">
-      <HintPath>..\..\..\packages\ServiceStack.Redis.3.7.7\lib\net35\ServiceStack.Redis.dll</HintPath>
+      <HintPath>packages\ServiceStack.Redis.3.7.9\lib\net35\ServiceStack.Redis.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.ServiceInterface">
-      <HintPath>..\..\..\packages\ServiceStack.3.7.7\lib\net35\ServiceStack.ServiceInterface.dll</HintPath>
+      <HintPath>packages\ServiceStack.3.7.9\lib\net35\ServiceStack.ServiceInterface.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc">
+      <HintPath>packages\AspNetMvc.3.0.20105.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor">
+      <HintPath>packages\AspNetRazor.Core.1.0.20105.407\lib\net40\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Helpers">
+      <HintPath>packages\AspNetWebPages.Core.1.0.20105.407\lib\net40\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment">
+      <HintPath>packages\AspNetWebPages.Core.1.0.20105.407\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor">
+      <HintPath>packages\AspNetWebPages.Core.1.0.20105.407\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages">
+      <HintPath>packages\AspNetWebPages.Core.1.0.20105.407\lib\net40\System.Web.WebPages.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -436,73 +453,6 @@
     <Compile Include="Nuxleus.PubSub\LLUP\BlipMessage.cs" />
     <Compile Include="Nuxleus.PubSub\LLUP\Relevance.cs" />
     <Compile Include="Nuxleus.PubSub\LLUP\Scope.cs" />
-    <Compile Include="Nuxleus.Web\HttpApplication\FileMessageQueue_Global.cs" />
-    <Compile Include="Nuxleus.Web\HttpApplication\Global.cs" />
-    <Compile Include="Nuxleus.Web\HttpAsyncRequestProcessing\HttpGetAsyncResponse.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpCollectionListingServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpMediaCollectionCreationServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpDeleteEventServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpMediaListingServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpMediaCreationServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpEventListingServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpEventCreationServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAccountLoginServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAccountCreationServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpSessionManagementServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAccountManagementServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncAtomEntryRatingServiceHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncCreateNewAtomEntryHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncGenerateAtomServiceDocHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncImageResizeOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncImageResizeOperationStatusHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncJobStatusRequestHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncStaticFileHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncSuggestionFormHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncTrackerReaderHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncFormHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncRequestValidationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncRedirectHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\XPathServiceOperationManager.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncQueryEntityHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncTrackerAndRedirectHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncFileNotFoundHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusEventHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpValidateRequestHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpNotFoundHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpSessionRequestHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpGeoLocationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpSessionLogoutHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpAsyncXmlServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\NuxleusHttpUpcomingDotOrgEventListingServiceOperationHandler.cs" />
-    <Compile Include="Nuxleus.Web\HttpHandler\temp.cs" />
-    <Compile Include="Nuxleus.Web\HttpModule\NuxleusAsyncRequestOpenIDAuthenticationHttpModule.cs" />
-    <Compile Include="Nuxleus.Web\HttpModule\AsyncRequestLogHttpModule.cs" />
-    <Compile Include="Nuxleus.Web\Message\Message.cs" />
-    <Compile Include="Nuxleus.Web\Utils\HttpHandlerHelpers.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\CombinedFile.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\ConfigDomainElement.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\ConfigDomainElementCollection.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\ConfigSection.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\ConfigUrlElement.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\ConfigUrlElementCollection.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\FileTypeUtilities.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\HeadAdapter.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\HeadAnalysis.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\HttpHandler.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\UrlProcessor.cs" />
-    <Compile Include="Nuxleus.Web\Utils\CombineAndMinify\UrlVersioner.cs" />
-    <Compile Include="Nuxleus.Web\Utils\ImageOptimizationFramework\ImageOptimizationModule.cs" />
-    <Compile Include="Nuxleus.Web\Utils\ImageOptimizationFramework\ImageOptimizations.cs" />
-    <Compile Include="Nuxleus.Web\Utils\ImageOptimizationFramework\ImageSettings.cs" />
-    <Compile Include="Nuxleus.Web\Utils\ImageExControl\ImageSprite.cs" />
-    <Compile Include="Nuxleus.Web\Utils\ImageExControl\LinkCss.cs" />
-    <Compile Include="Nuxleus.Web\Utils\ImageExControl\StringWrapper.cs" />
-    <Compile Include="Nuxleus.Web\XmlServiceOperation\Context.cs" />
-    <Compile Include="Nuxleus.Web\XmlServiceOperation\XmlServiceOperationManager.cs" />
-    <Compile Include="Nuxleus.Web\XmlServiceOperation\XmlServiceOperationReader.cs" />
-    <Compile Include="Nuxleus.Web\XPathServiceOperationNavigator\XPathServiceOperationNavigator.cs" />
     <Compile Include="Nuxleus.Web\Agent.cs" />
     <Compile Include="Nuxleus.Service\Authentication\Authenticate.cs">
       <SubType>Component</SubType>
@@ -560,7 +510,6 @@
     <Compile Include="Nuxleus.Xameleon\Function\AWSSimpleDBFunctions.cs" />
     <Compile Include="Nuxleus.Xameleon\Function\Facebook.cs" />
     <Compile Include="Nuxleus.Xameleon\Function\FileStream.cs" />
-    <Compile Include="Nuxleus.Xameleon\Function\HashcodeGenerator.cs" />
     <Compile Include="Nuxleus.Xameleon\Function\HttpRequestCollection.cs" />
     <Compile Include="Nuxleus.Xameleon\Function\HttpResponseCollection.cs" />
     <Compile Include="Nuxleus.Xameleon\Function\HttpSgmlToXml.cs" />
@@ -579,7 +528,6 @@
     <Compile Include="Nuxleus.Messaging\Message\MessageService.cs" />
     <Compile Include="Nuxleus.Messaging\Notification\Notification.cs" />
     <Compile Include="Nuxleus.Core\IEntity.cs" />
-    <Compile Include="Nuxleus.Core\Log.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Nuxleus.Core\Drawing\ConvertImage.cs" />
     <Compile Include="Nuxleus.Core\Drawing\ConvertImage_Resize.cs" />
@@ -669,11 +617,196 @@
     <Compile Include="Nuxleus.Extension\ExtensionMethods\ByteExtensionMethods\Byte_StringTransforms.cs" />
     <Compile Include="Nuxleus.Extension\ExtensionMethods\ByteExtensionMethods\Byte_IntegerTransforms.cs" />
     <Compile Include="Nuxleus.Extension\ExtensionMethods\ITaskExtensionMethods\ITask_Invoke.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpApplication\FileMessageQueue_Global.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpApplication\Global.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpAsyncRequestProcessing\HttpGetAsyncResponse.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpModule\NuxleusAsyncRequestOpenIDAuthenticationHttpModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpModule\AsyncRequestLogHttpModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpCollectionListingServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpMediaCollectionCreationServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpDeleteEventServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpMediaListingServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpMediaCreationServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpEventListingServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpEventCreationServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAccountLoginServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAccountCreationServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpSessionManagementServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAccountManagementServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncAtomEntryRatingServiceHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncCreateNewAtomEntryHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncGenerateAtomServiceDocHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncImageResizeOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncImageResizeOperationStatusHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncJobStatusRequestHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncStaticFileHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncSuggestionFormHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncTrackerReaderHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncFormHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncRequestValidationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncRedirectHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\XPathServiceOperationManager.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncQueryEntityHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncTrackerAndRedirectHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncFileNotFoundHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusEventHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpValidateRequestHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpNotFoundHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpSessionRequestHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpGeoLocationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpSessionLogoutHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpAsyncXmlServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\NuxleusHttpUpcomingDotOrgEventListingServiceOperationHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.HttpHandler\temp.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.XmlServiceOperation\Context.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.XmlServiceOperation\XmlServiceOperationManager.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.XmlServiceOperation\XmlServiceOperationReader.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.XPathServiceOperationNavigator\XPathServiceOperationNavigator.cs" />
+    <Compile Include="Nuxleus.Web\Message.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\HttpHandlerHelpers.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\CombinedFile.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\ConfigDomainElement.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\ConfigDomainElementCollection.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\ConfigSection.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\ConfigUrlElement.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\ConfigUrlElementCollection.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\FileTypeUtilities.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\HeadAdapter.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\HeadAnalysis.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\HttpHandler.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\UrlProcessor.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CombineAndMinify\UrlVersioner.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\ImageOptimizationFramework\ImageOptimizationModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\ImageOptimizationFramework\ImageOptimizations.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\ImageOptimizationFramework\ImageSettings.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\ImageExControl\ImageSprite.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\ImageExControl\LinkCss.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\ImageExControl\StringWrapper.cs" />
+    <Compile Include="Nuxleus.Web.Mvc\AtomicTalkViewEngine.cs" />
+    <Compile Include="Nuxleus.Web.Mvc\AtomicTalkView.cs" />
+    <Compile Include="Nuxleus.Web\IHasXPathItemFactory.cs" />
+    <Compile Include="Nuxleus.Web\IXsltProcessor.cs" />
+    <Compile Include="Nuxleus.Web\ProcessorException.cs" />
+    <Compile Include="Nuxleus.Web\Processors.cs" />
+    <Compile Include="Nuxleus.Web\XmlParsingOptions.cs" />
+    <Compile Include="Nuxleus.Web\XmlSerializationOptions.cs" />
+    <Compile Include="Nuxleus.Web\XPathItemFactory.cs" />
+    <Compile Include="Nuxleus.Web\XPathModules.cs" />
+    <Compile Include="Nuxleus.Web\XsltCompileOptions.cs" />
+    <Compile Include="Nuxleus.Web\XsltExecutable.cs" />
+    <Compile Include="Nuxleus.Web\XsltRuntimeOptions.cs" />
+    <Compile Include="Nuxleus.Web\XmlDynamicResolver.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\ExpressionBuilderElement.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\ExpressionBuilderElementCollection.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\LibraryConfigSection.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\ProcessorElement.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\ProcessorElementCollection.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\ResolverElement.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\ResolverElementCollection.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\TypeLoader.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\XQueryElement.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Configuration\XsltElement.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.MetaData\XPathModuleAdapterInfo.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.MetaData\XPathModuleAdapterExportAttribute.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.MetaData\XPathModuleInfo.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.MetaData\XPathFunctionAttribute.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.MetaData\XPathModuleAttribute.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\XsltPage.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\XsltPageParser.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\XsltPageType.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\BasePage.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\BasePageParser.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\BaseParser.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\OutputCachedPage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\PageHandlerFactory.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\PageParameterInfo.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\ParsedValue`1.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI\SchematronParser.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\BaseBuildProvider.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\BaseCodeDomTreeGenerator.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\BasePageBuildProvider.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\BasePageCodeDomTreeGenerator.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\BindingExpressionBuilder.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\BindingExpressionContext.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\BindingExpressionInfo.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\CodeExpressionBuilder.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\RequestExpressionBuilder.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\SchematronValidatorBuildProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\SchematronValidatorCodeDomTreeGenerator.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\SessionExpressionBuilder.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\XsltPageBuildProvider.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\XsltPageCodeDomTreeGenerator.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\CLR.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\HttpContextExtensions.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\StreamUtil.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\TypeResolver.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\WellKnownNamespaces.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\XHtmlWriter.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Utility\XmlWrappingWriter.cs" />
+    <Compile Include="Nuxleus.Web\XmlEmbeddedResourceResolver.cs" />
+    <Compile Include="Nuxleus.Web\XmlVirtualPathAwareUrlResolver.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Schematron\Schematron.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Schematron\SchematronXsltValidator.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\SystemXsltException.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\SystemXsltExecutable.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\SystemXsltProcessor.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\EmptyXPathNodeIterator.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\ExtensionObjectConvert.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\ExtensionObjectGenerator.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\SystemItemFactory.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\HttpClientExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\RequestModuleExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\ResponseModuleExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\SessionModuleExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\SmtpClientExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\UtilModuleExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\ValidationModuleExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.System\Nuxleus.Web.Sys.Modules\XPathFunctionsExtensionObject.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\expath.httpclient\MediaTypes.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\expath.httpclient\XPathHttpBody.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\expath.httpclient\XPathHttpClient.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\expath.httpclient\XPathHttpMultipart.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\expath.httpclient\XPathHttpMultipartItem.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\expath.httpclient\XPathHttpRequest.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\expath.httpclient\XPathHttpResponse.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\smtpclient\XPathMailAddress.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\smtpclient\XPathMailBody.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\smtpclient\XPathMailMessage.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\smtpclient\XPathSmtpClient.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\smtpclient\XPathSmtpError.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\smtpclient\XPathSmtpSuccess.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\SecurityModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\UtilModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\ValidationModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\RequestModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\ResponseModule.cs" />
+    <Compile Include="Nuxleus.Web\Nuxleus.Web.Modules\SessionModule.cs" />
+    <Compile Include="App_Start\Nuxleus_AppStart.cs" />
+    <Compile Include="Nuxleus.Web\IXQueryProcessor.cs" />
+    <Compile Include="Nuxleus.Web\XQueryCompileOptions.cs" />
+    <Compile Include="Nuxleus.Web\XQueryExecutable.cs" />
+    <Compile Include="Nuxleus.Web\XQueryRuntimeOptions.cs" />
+    <Compile Include="Nuxleus.Web.Mvc\DummyTempDataProvider.cs" />
+    <Compile Include="App_Start\PreApplicationStartCode.cs" />
+    <Compile Include="Nuxleus.Web.Mvc\App_Start\AtomicTalkViewEngine_AppStart.cs" />
+    <Compile Include="Nuxleus.Web.Mvc\App_Start\PreApplicationStartCode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Nuxleus.Core\Core\IO\Storage\Cache\Memcached\" />
     <Folder Include="Nuxleus.Core\Core\IO\Storage\Cache\Redis\" />
+    <Folder Include="Nuxleus.Web.Mvc\" />
+    <Folder Include="Nuxleus.Web\Nuxleus.Web.Configuration\" />
+    <Folder Include="Nuxleus.Web\Nuxleus.Web.Modules\" />
+    <Folder Include="Nuxleus.Web\Nuxleus.Web.System\" />
+    <Folder Include="Nuxleus.Web\Nuxleus.Web.Session\" />
+    <Folder Include="Nuxleus.Web.Mvc\App_Start\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Nuxleus.Core\Configuration\App.config" />
@@ -689,6 +822,23 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\iso_abstract_expand.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\iso_dsdl_include.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\iso_schematron_message_xslt2.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\iso_schematron_skeleton_for_saxon.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\iso_svrl_for_xslt2.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\readme.txt" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-en.xhtml" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_abstract_expand.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_dsdl_include.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_schematron_message.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_schematron_skeleton_for_xslt1.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_svrl_for_xslt1.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\readme.txt" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-de.xhtml" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-fr.xhtml" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-cs.xhtml" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-nl.xhtml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

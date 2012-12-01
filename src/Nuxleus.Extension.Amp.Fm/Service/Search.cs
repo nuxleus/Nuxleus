@@ -17,47 +17,53 @@ namespace Nuxleus.Extension.Amp.Fm
     public class Search : WebService
     {
 
-        public enum TYPE { TITLE, ARTIST, GENRE, LYRICS }
+        public enum TYPE
+        {
+            TITLE,
+            ARTIST,
+            GENRE,
+            LYRICS
+        }
 
         [WebMethod(
             Description = "Returns a list of media file titles that contain the specified search phrase",
             EnableSession = false)]
         [XmlInclude(typeof(Entity.Entity))]
-        public Entity.Entity[] SearchTitle(string searchPhrase, params string[] additionalSearchParams)
+        public Entity.Entity[] SearchTitle (string searchPhrase, params string [] additionalSearchParams)
         {
-            return search(searchPhrase, TYPE.TITLE);
+            return search (searchPhrase, TYPE.TITLE);
         }
 
         [WebMethod(
             Description = "Returns a list of artists that contain the specified search phrase",
             EnableSession = false)]
         [XmlInclude(typeof(Entity.Entity))]
-        public Entity.Entity[] SearchArtist(string artistName)
+        public Entity.Entity[] SearchArtist (string artistName)
         {
-            return search(artistName, TYPE.ARTIST);
+            return search (artistName, TYPE.ARTIST);
         }
 
         [WebMethod(
             Description = "Returns a list of genres that contain the specified search phrase",
             EnableSession = false)]
         [XmlInclude(typeof(Entity.Entity))]
-        public Entity.Entity[] SearchGenre(string genre)
+        public Entity.Entity[] SearchGenre (string genre)
         {
-            return search(genre, TYPE.GENRE);
+            return search (genre, TYPE.GENRE);
         }
 
         [WebMethod(
             Description = "Returns a list of media files whos associated lyrics contain the specified search phrase",
             EnableSession = false)]
         [XmlInclude(typeof(Entity.Entity))]
-        public Entity.Entity[] SearchLyrics(string searchPhrase)
+        public Entity.Entity[] SearchLyrics (string searchPhrase)
         {
-            return search(searchPhrase, TYPE.LYRICS);
+            return search (searchPhrase, TYPE.LYRICS);
         }
 
         [WebMethod]
         [XmlInclude(typeof(Entity.Entity))]
-        private Entity.Entity[] search(string searchPhrase, TYPE type)
+        private Entity.Entity[] search (string searchPhrase, TYPE type)
         {
 
             string scheme = "http://amp.fm/";
@@ -69,8 +75,7 @@ namespace Nuxleus.Extension.Amp.Fm
                 new Entity.Entity{ Label = "Elliotte Smith", Term = "elliottesmith", Scheme = scheme},
             };
 
-            switch (type)
-            {
+            switch (type) {
                 case TYPE.ARTIST:
                     return entityList;
                     break;
