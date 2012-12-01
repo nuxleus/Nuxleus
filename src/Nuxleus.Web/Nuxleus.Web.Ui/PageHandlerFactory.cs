@@ -18,7 +18,7 @@ using System.Text;
 using System.Web;
 using System.Web.Compilation;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public class PageHandlerFactory : IHttpHandlerFactory {
 

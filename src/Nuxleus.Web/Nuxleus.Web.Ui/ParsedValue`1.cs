@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public class ParsedValue<T> {
 

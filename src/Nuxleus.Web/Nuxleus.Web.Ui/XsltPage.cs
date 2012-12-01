@@ -19,7 +19,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public abstract class XsltPage : BasePage, IHasXPathItemFactory {
 

@@ -18,7 +18,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.UI;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
 
    [SuppressMessage("ASP.NET.Security", "CA5328:ValidateRequestShouldBeEnabled", Justification = "Instances of this type are not created in response to direct user input.")]
    sealed class OutputCachedPage : System.Web.UI.Page {

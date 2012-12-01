@@ -21,7 +21,7 @@ using System.Xml.XPath;
 using PIAttribs = System.Collections.Generic.IDictionary<string, string>;
 using Nuxleus.Web.Configuration;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public class SchematronParser : BaseParser {
       

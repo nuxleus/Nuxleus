@@ -23,9 +23,9 @@ using System.Web.Hosting;
 using System.Web.UI;
 using System.Xml;
 using System.Xml.XPath;
-using Nuxleus.Web.UI.Compilation;
+using Nuxleus.Web.Page.Compilation;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public class XsltPageParser : BasePageParser {
 

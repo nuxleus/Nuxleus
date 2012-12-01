@@ -24,7 +24,7 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Text.RegularExpressions;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public abstract class BaseParser {
 

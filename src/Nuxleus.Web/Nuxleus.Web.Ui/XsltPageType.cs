@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public enum XsltPageType {
       StandardStylesheet,

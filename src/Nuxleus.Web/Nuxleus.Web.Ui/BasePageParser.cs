@@ -22,7 +22,7 @@ using System.Web;
 using System.IO;
 using System.Configuration;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public abstract class BasePageParser : BaseParser {
 

@@ -18,9 +18,9 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Nuxleus.Web.UI.Compilation;
+using Nuxleus.Web.Page.Compilation;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public class PageParameterInfo {
 

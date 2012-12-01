@@ -23,7 +23,7 @@ using System.Text;
 using System.Linq;
 using System.Globalization;
 
-namespace Nuxleus.Web.UI {
+namespace Nuxleus.Web.Page {
    
    public abstract class BasePage : IHttpHandler {
 
