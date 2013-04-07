@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,43 +21,49 @@ using System.Xml;
 using System.Web.Hosting;
 using System.Web;
 
-namespace Nuxleus.Web.Page.Compilation {
-   
-   public class XQueryPageCodeDomTreeGenerator : BasePageCodeDomTreeGenerator {
+using Nuxleus.Web.UI.Compilation;
 
-      XQueryPageParser parser;
-      Type _PageBaseClass;
-      CodeMemberField executableField;
+namespace Nuxleus.Web.Page.Compilation
+{
+	public class XQueryPageCodeDomTreeGenerator : BasePageCodeDomTreeGenerator
+	{
 
-      protected override Type PageBaseClass {
-         get { return _PageBaseClass; }
-      }
+		XQueryPageParser parser;
+		Type _PageBaseClass;
+		CodeMemberField executableField;
 
-      public XQueryPageCodeDomTreeGenerator(XQueryPageParser parser)
-         : base(parser) {
+		protected override Type PageBaseClass {
+			get { return _PageBaseClass; }
+		}
 
-         this.parser = parser;
-         _PageBaseClass = typeof(XQueryPage);
-      }
+		public XQueryPageCodeDomTreeGenerator (XQueryPageParser parser)
+         : base(parser)
+		{
 
-      protected override void AddPageFields(CodeTypeMemberCollection members) {
-         base.AddPageFields(members);
+			this.parser = parser;
+			_PageBaseClass = typeof(XQueryPage);
+		}
 
-         executableField = new CodeMemberField {
+		protected override void AddPageFields (CodeTypeMemberCollection members)
+		{
+			base.AddPageFields (members);
+
+			executableField = new CodeMemberField {
             Name = "_Executable",
             Type = new CodeTypeReference(typeof(XQueryExecutable)),
             Attributes = MemberAttributes.Private | MemberAttributes.Static
          };
 
-         members.Add(executableField);
-      }
+			members.Add (executableField);
+		}
 
-      protected override void AddPageTypeCtorStatements(CodeStatementCollection statements) {
-         base.AddPageTypeCtorStatements(statements);
+		protected override void AddPageTypeCtorStatements (CodeStatementCollection statements)
+		{
+			base.AddPageTypeCtorStatements (statements);
 
-         CodeTypeReference uriType = new CodeTypeReference(typeof(Uri));
+			CodeTypeReference uriType = new CodeTypeReference (typeof(Uri));
 
-         CodeVariableDeclarationStatement procVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement procVar = new CodeVariableDeclarationStatement {
             Name = "proc",
             Type = new CodeTypeReference(typeof(IXQueryProcessor)),
             InitExpression = new CodeIndexerExpression {
@@ -72,19 +77,19 @@ namespace Nuxleus.Web.Page.Compilation {
             }
          };
 
-         CodeVariableDeclarationStatement sourceVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement sourceVar = new CodeVariableDeclarationStatement {
             Name = "source",
             Type = new CodeTypeReference(typeof(Stream)),
             InitExpression = new CodePrimitiveExpression(null)
          };
 
-         CodeVariableDeclarationStatement virtualPathVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement virtualPathVar = new CodeVariableDeclarationStatement {
             Name = "virtualPath",
             Type = new CodeTypeReference(typeof(String)),
             InitExpression = new CodePrimitiveExpression(this.parser.AppRelativeVirtualPath)
          };
 
-         CodeVariableDeclarationStatement sourceUriVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement sourceUriVar = new CodeVariableDeclarationStatement {
             Name = "sourceUri",
             Type = uriType,
             InitExpression = new CodeObjectCreateExpression {
@@ -107,8 +112,8 @@ namespace Nuxleus.Web.Page.Compilation {
             }
          };
          
-         CodeTryCatchFinallyStatement trySt = new CodeTryCatchFinallyStatement();
-         trySt.TryStatements.Add(new CodeAssignStatement {
+			CodeTryCatchFinallyStatement trySt = new CodeTryCatchFinallyStatement ();
+			trySt.TryStatements.Add (new CodeAssignStatement {
             Left = new CodeVariableReferenceExpression(sourceVar.Name),
             Right = new CodeCastExpression {
                TargetType = new CodeTypeReference(typeof(Stream)),
@@ -127,21 +132,21 @@ namespace Nuxleus.Web.Page.Compilation {
             }
          });
 
-         CodeVariableDeclarationStatement optionsVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement optionsVar = new CodeVariableDeclarationStatement {
             Name = "options",
             Type = new CodeTypeReference(typeof(XQueryCompileOptions)),
          };
-         optionsVar.InitExpression = new CodeObjectCreateExpression(optionsVar.Type);
+			optionsVar.InitExpression = new CodeObjectCreateExpression (optionsVar.Type);
 
-         trySt.TryStatements.Add(optionsVar);
-         trySt.TryStatements.Add(new CodeAssignStatement {
+			trySt.TryStatements.Add (optionsVar);
+			trySt.TryStatements.Add (new CodeAssignStatement {
             Left = new CodePropertyReferenceExpression {
                PropertyName = "BaseUri",
                TargetObject = new CodeVariableReferenceExpression(optionsVar.Name)
             },
             Right = new CodeVariableReferenceExpression(sourceUriVar.Name)
          });
-         trySt.TryStatements.Add(new CodeAssignStatement {
+			trySt.TryStatements.Add (new CodeAssignStatement {
             Left = new CodeFieldReferenceExpression {
                FieldName = executableField.Name,
                TargetObject = PageTypeReferenceExpression
@@ -158,38 +163,45 @@ namespace Nuxleus.Web.Page.Compilation {
             }
          });
 
-         CodeConditionStatement disposeIf = new CodeConditionStatement {
+			CodeConditionStatement disposeIf = new CodeConditionStatement {
             Condition = new CodeBinaryOperatorExpression {
                Left = new CodeVariableReferenceExpression(sourceVar.Name),
                Operator = CodeBinaryOperatorType.IdentityInequality,
                Right = new CodePrimitiveExpression(null)
             }
          };
-         disposeIf.TrueStatements.Add(new CodeMethodInvokeExpression(
+			disposeIf.TrueStatements.Add (new CodeMethodInvokeExpression (
             new CodeMethodReferenceExpression {
                MethodName = "Dispose",
                TargetObject = new CodeVariableReferenceExpression(sourceVar.Name)
             }
-         ));
+			));
 
-         trySt.FinallyStatements.Add(disposeIf);
+			trySt.FinallyStatements.Add (disposeIf);
 
-         statements.AddRange(new CodeStatement[] { procVar, sourceVar, virtualPathVar, sourceUriVar, trySt });
-      }
+			statements.AddRange (new CodeStatement[] {
+                procVar,
+                sourceVar,
+                virtualPathVar,
+                sourceUriVar,
+                trySt
+            });
+		}
 
-      protected override void AddPageProperties(CodeTypeMemberCollection members) {
-         base.AddPageProperties(members);
+		protected override void AddPageProperties (CodeTypeMemberCollection members)
+		{
+			base.AddPageProperties (members);
 
-         CodeMemberProperty executableProperty = new CodeMemberProperty {
+			CodeMemberProperty executableProperty = new CodeMemberProperty {
             Name = "Executable",
             Type = executableField.Type,
             Attributes = MemberAttributes.Public | MemberAttributes.Override,
             HasSet = false,
             HasGet = true,
          };
-         executableProperty.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(PageTypeReferenceExpression, executableField.Name)));
+			executableProperty.GetStatements.Add (new CodeMethodReturnStatement (new CodeFieldReferenceExpression (PageTypeReferenceExpression, executableField.Name)));
 
-         members.Add(executableProperty);
-      }
-   }
+			members.Add (executableProperty);
+		}
+	}
 }

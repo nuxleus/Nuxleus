@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
@@ -22,247 +21,258 @@ using System.Text;
 using System.Web;
 using System.Web.Compilation;
 using System.Web.Hosting;
-using Nuxleus.Web.UI;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.UI.Compilation {
+namespace Nuxleus.Web.UI.Compilation
+{
+	public abstract class BaseBuildProvider : BuildProvider
+	{
 
-   public abstract class BaseBuildProvider : BuildProvider {
+		static readonly Action<ParserError> reportParseError;
+		string _GeneratedTypeName, _GeneratedTypeNamespace, _GeneratedTypeFullName;
+		Uri _PhysicalPath, _ApplicationPhysicalPath;
+		string _AppRelativeVirtualPath;
+		bool? _IsFileInCodeDir;
 
-      static readonly Action<ParserError> reportParseError;
+		protected string AppRelativeVirtualPath {
+			get {
+				if (_AppRelativeVirtualPath == null)
+					_AppRelativeVirtualPath = VirtualPathUtility.ToAppRelative (this.VirtualPath);
+				return _AppRelativeVirtualPath;
+			}
+		}
 
-      string _GeneratedTypeName, _GeneratedTypeNamespace, _GeneratedTypeFullName;
+		protected Uri PhysicalPath { 
+			get {
+				if (_PhysicalPath == null) 
+					_PhysicalPath = new Uri (HostingEnvironment.MapPath (VirtualPath), UriKind.Absolute);              
+				return _PhysicalPath;
+			} 
+		}
 
-      Uri _PhysicalPath, _ApplicationPhysicalPath;
-      string _AppRelativeVirtualPath;
-      bool? _IsFileInCodeDir;
+		protected Uri ApplicationPhysicalPath {
+			get {
+				if (_ApplicationPhysicalPath == null)
+					_ApplicationPhysicalPath = new Uri (HostingEnvironment.ApplicationPhysicalPath, UriKind.Absolute);
+				return _ApplicationPhysicalPath;
+			}
+		}
 
-      protected string AppRelativeVirtualPath {
-         get {
-            if (_AppRelativeVirtualPath == null)
-               _AppRelativeVirtualPath = VirtualPathUtility.ToAppRelative(this.VirtualPath);
-            return _AppRelativeVirtualPath;
-         }
-      }
-
-      protected Uri PhysicalPath { 
-         get {
-            if (_PhysicalPath == null) 
-               _PhysicalPath = new Uri(HostingEnvironment.MapPath(VirtualPath), UriKind.Absolute);              
-            return _PhysicalPath;
-         } 
-      }
-
-      protected Uri ApplicationPhysicalPath {
-         get {
-            if (_ApplicationPhysicalPath == null)
-               _ApplicationPhysicalPath = new Uri(HostingEnvironment.ApplicationPhysicalPath, UriKind.Absolute);
-            return _ApplicationPhysicalPath;
-         }
-      }
-
-      protected bool IsFileInCodeDir {
-         get { 
-            if (!_IsFileInCodeDir.HasValue)
-               _IsFileInCodeDir = AppRelativeVirtualPath
-                  .Remove(0, 2)
-                  .Split('/')[0]
-                  .Equals("App_Code", StringComparison.OrdinalIgnoreCase);
+		protected bool IsFileInCodeDir {
+			get { 
+				if (!_IsFileInCodeDir.HasValue)
+					_IsFileInCodeDir = AppRelativeVirtualPath
+                  .Remove (0, 2)
+                  .Split ('/') [0]
+                  .Equals ("App_Code", StringComparison.OrdinalIgnoreCase);
             
-            return _IsFileInCodeDir.Value;
-         }
-      }
+				return _IsFileInCodeDir.Value;
+			}
+		}
 
-      protected string GeneratedTypeName {
-         get {
-            if (_GeneratedTypeName == null) 
-               _GeneratedTypeNamespace = GetNamespaceAndTypeNameFromVirtualPath((IsFileInCodeDir) ? 1 : 0, out _GeneratedTypeName);
-            return _GeneratedTypeName;
-         }
-      }
+		protected string GeneratedTypeName {
+			get {
+				if (_GeneratedTypeName == null) 
+					_GeneratedTypeNamespace = GetNamespaceAndTypeNameFromVirtualPath ((IsFileInCodeDir) ? 1 : 0, out _GeneratedTypeName);
+				return _GeneratedTypeName;
+			}
+		}
 
-      protected string GeneratedTypeNamespace {
-         get {
-            if (_GeneratedTypeNamespace == null) {
-               // getting GeneratedTypeName will initialize _GeneratedTypeNamespace
-               string s = GeneratedTypeName;
-            }
-            return _GeneratedTypeNamespace;
-         }
-      }
+		protected string GeneratedTypeNamespace {
+			get {
+				if (_GeneratedTypeNamespace == null) {
+					// getting GeneratedTypeName will initialize _GeneratedTypeNamespace
+					string s = GeneratedTypeName;
+				}
+				return _GeneratedTypeNamespace;
+			}
+		}
 
-      protected string GeneratedTypeFullName {
-         get {
-            if (_GeneratedTypeFullName == null) 
-               _GeneratedTypeFullName = (GeneratedTypeNamespace.Length == 0) ? GeneratedTypeName : String.Concat(GeneratedTypeNamespace, ".", GeneratedTypeName);        
-            return _GeneratedTypeFullName;
-         }
-         set {
-            if (String.IsNullOrEmpty(value))
-               throw new ArgumentException("value cannot be null or empty", "value");
+		protected string GeneratedTypeFullName {
+			get {
+				if (_GeneratedTypeFullName == null) 
+					_GeneratedTypeFullName = (GeneratedTypeNamespace.Length == 0) ? GeneratedTypeName : String.Concat (GeneratedTypeNamespace, ".", GeneratedTypeName);        
+				return _GeneratedTypeFullName;
+			}
+			set {
+				if (String.IsNullOrEmpty (value))
+					throw new ArgumentException ("value cannot be null or empty", "value");
 
-            _GeneratedTypeName = _GeneratedTypeNamespace = _GeneratedTypeFullName = null;
+				_GeneratedTypeName = _GeneratedTypeNamespace = _GeneratedTypeFullName = null;
 
-            if (value.Contains(".")) {
-               string[] segments = value.Split('.');
-               _GeneratedTypeName = segments[segments.Length - 1];
-               _GeneratedTypeNamespace = String.Join(".", segments, 0, segments.Length - 1);
-            } else {
-               _GeneratedTypeName = value;
-               _GeneratedTypeNamespace = "";
-            }
-         }
-      }
+				if (value.Contains (".")) {
+					string[] segments = value.Split ('.');
+					_GeneratedTypeName = segments [segments.Length - 1];
+					_GeneratedTypeNamespace = String.Join (".", segments, 0, segments.Length - 1);
+				} else {
+					_GeneratedTypeName = value;
+					_GeneratedTypeNamespace = "";
+				}
+			}
+		}
 
-      protected BaseParser Parser { get; private set; }
+		protected BaseParser Parser { get; private set; }
 
-      public override CompilerType CodeCompilerType {
-         get {
-            Parse();
+		public override CompilerType CodeCompilerType {
+			get {
+				Parse ();
 
-            return (!String.IsNullOrEmpty(Parser.Language)) ? 
-               GetDefaultCompilerTypeForLanguage(Parser.Language)
+				return (!String.IsNullOrEmpty (Parser.Language)) ? 
+               GetDefaultCompilerTypeForLanguage (Parser.Language)
                : base.CodeCompilerType;
-         }
-      }
+			}
+		}
 
-      static BaseBuildProvider() {
+		static BaseBuildProvider ()
+		{
          
-         MethodInfo reportParseErrorMethod = typeof(BuildManager).GetMethod("ReportParseError", BindingFlags.Static | BindingFlags.NonPublic);
+			MethodInfo reportParseErrorMethod = typeof(BuildManager).GetMethod ("ReportParseError", BindingFlags.Static | BindingFlags.NonPublic);
 
-         if (reportParseErrorMethod != null)
-            reportParseError = (Action<ParserError>)Delegate.CreateDelegate(typeof(Action<ParserError>), reportParseErrorMethod);
-      }
+			if (reportParseErrorMethod != null)
+				reportParseError = (Action<ParserError>)Delegate.CreateDelegate (typeof(Action<ParserError>), reportParseErrorMethod);
+		}
 
-      protected abstract BaseParser CreateParser();
-      protected abstract BaseCodeDomTreeGenerator CreateCodeDomTreeGenerator(BaseParser parser);
+		protected abstract BaseParser CreateParser ();
 
-      void Parse() {
+		protected abstract BaseCodeDomTreeGenerator CreateCodeDomTreeGenerator (BaseParser parser);
 
-         BaseParser parser = CreateParser();
-         parser.VirtualPath = this.VirtualPath;
-         parser.PhysicalPath = this.PhysicalPath;
+		void Parse ()
+		{
 
-         this.Parser = parser;
+			BaseParser parser = CreateParser ();
+			parser.VirtualPath = this.VirtualPath;
+			parser.PhysicalPath = this.PhysicalPath;
 
-         try {
-            using (TextReader reader = OpenReader()) {
-               parser.Parse(reader);
-            }
-         } catch (TypeInitializationException ex) {
+			this.Parser = parser;
 
-            ReportParseError(new ParserError(ex.InnerException.Message, this.VirtualPath, 1));
-            throw new HttpParseException(ex.InnerException.Message, ex.InnerException);
+			try {
+				using (TextReader reader = OpenReader()) {
+					parser.Parse (reader);
+				}
+			} catch (TypeInitializationException ex) {
 
-         } catch (HttpParseException ex) {
+				ReportParseError (new ParserError (ex.InnerException.Message, this.VirtualPath, 1));
+				throw new HttpParseException (ex.InnerException.Message, ex.InnerException);
 
-            ReportParseError(new ParserError(ex.Message, this.VirtualPath, ex.Line));
-            throw;
-         }
+			} catch (HttpParseException ex) {
 
-         if (parser.GeneratedTypeFullName != null)
-            this.GeneratedTypeFullName = parser.GeneratedTypeFullName;
-      }
+				ReportParseError (new ParserError (ex.Message, this.VirtualPath, ex.Line));
+				throw;
+			}
 
-      void ReportParseError(ParserError err) {
+			if (parser.GeneratedTypeFullName != null)
+				this.GeneratedTypeFullName = parser.GeneratedTypeFullName;
+		}
 
-         if (reportParseError != null)
-            reportParseError(err);
-      }
+		void ReportParseError (ParserError err)
+		{
 
-      public override void GenerateCode(AssemblyBuilder assemblyBuilder) {
+			if (reportParseError != null)
+				reportParseError (err);
+		}
+
+		public override void GenerateCode (AssemblyBuilder assemblyBuilder)
+		{
          
-         BaseCodeDomTreeGenerator codeDomGen = CreateCodeDomTreeGenerator(this.Parser);
-         codeDomGen.GeneratedTypeName = this.GeneratedTypeName;
-         codeDomGen.GeneratedTypeNamespace = this.GeneratedTypeNamespace;
-         codeDomGen.GeneratedTypeFullName = this.GeneratedTypeFullName;
+			BaseCodeDomTreeGenerator codeDomGen = CreateCodeDomTreeGenerator (this.Parser);
+			codeDomGen.GeneratedTypeName = this.GeneratedTypeName;
+			codeDomGen.GeneratedTypeNamespace = this.GeneratedTypeNamespace;
+			codeDomGen.GeneratedTypeFullName = this.GeneratedTypeFullName;
 
-         CodeCompileUnit compileUnit = new CodeCompileUnit();
-         codeDomGen.BuildCodeDomTree(compileUnit);
+			CodeCompileUnit compileUnit = new CodeCompileUnit ();
+			codeDomGen.BuildCodeDomTree (compileUnit);
 
-         assemblyBuilder.AddCodeCompileUnit(this, compileUnit);
-      }
+			assemblyBuilder.AddCodeCompileUnit (this, compileUnit);
+		}
 
-      public override Type GetGeneratedType(CompilerResults results) {
-         return results.CompiledAssembly.GetType(this.GeneratedTypeFullName);
-      }
+		public override Type GetGeneratedType (CompilerResults results)
+		{
+			return results.CompiledAssembly.GetType (this.GeneratedTypeFullName);
+		}
 
-      protected Exception CreateCompileException(ProcessorException exception) {
+		protected Exception CreateCompileException (ProcessorException exception)
+		{
 
-         string localPath = this.PhysicalPath.LocalPath;
-         string virtualPath = this.VirtualPath;
+			string localPath = this.PhysicalPath.LocalPath;
+			string virtualPath = this.VirtualPath;
 
-         int lineNumber = exception.LineNumber;
-         string errorCode = exception.GetErrorCodeAsClarkName();
-         string message = exception.Message;
+			int lineNumber = exception.LineNumber;
+			string errorCode = exception.GetErrorCodeAsClarkName ();
+			string message = exception.Message;
 
-         if (exception.ModuleUri != null && exception.ModuleUri.IsFile && exception.ModuleUri != this.PhysicalPath) {
-            localPath = exception.ModuleUri.LocalPath;
+			if (exception.ModuleUri != null && exception.ModuleUri.IsFile && exception.ModuleUri != this.PhysicalPath) {
+				localPath = exception.ModuleUri.LocalPath;
 
-            Uri diff = this.ApplicationPhysicalPath.MakeRelativeUri(exception.ModuleUri);
+				Uri diff = this.ApplicationPhysicalPath.MakeRelativeUri (exception.ModuleUri);
 
-            string diffString = diff.ToString();
+				string diffString = diff.ToString ();
 
-            if (!diffString.StartsWith(".."))
-               virtualPath = "/" + diffString;
-         }
+				if (!diffString.StartsWith (".."))
+					virtualPath = "/" + diffString;
+			}
 
-         return CreateCompileException(message, errorCode, lineNumber, localPath, virtualPath);
-      }
+			return CreateCompileException (message, errorCode, lineNumber, localPath, virtualPath);
+		}
 
-      protected Exception CreateCompileException(string errorMessage) {
-         return CreateCompileException(errorMessage, null, 1, this.PhysicalPath.LocalPath, this.VirtualPath);
-      }
+		protected Exception CreateCompileException (string errorMessage)
+		{
+			return CreateCompileException (errorMessage, null, 1, this.PhysicalPath.LocalPath, this.VirtualPath);
+		}
 
-      Exception CreateCompileException(string errorMessage, string errorCode, int lineNumber, string localPath, string virtualPath) {
+		Exception CreateCompileException (string errorMessage, string errorCode, int lineNumber, string localPath, string virtualPath)
+		{
          
-         CompilerResults r = new CompilerResults(null);
-         r.Errors.Add(new CompilerError(localPath, lineNumber, 1, errorCode, errorMessage));
+			CompilerResults r = new CompilerResults (null);
+			r.Errors.Add (new CompilerError (localPath, lineNumber, 1, errorCode, errorMessage));
 
-         ReportParseError(new ParserError(errorMessage, virtualPath, lineNumber));
+			ReportParseError (new ParserError (errorMessage, virtualPath, lineNumber));
 
-         return new HttpCompileException(r, this.PhysicalPath.LocalPath);
-      }
+			return new HttpCompileException (r, this.PhysicalPath.LocalPath);
+		}
 
-      string GetNamespaceAndTypeNameFromVirtualPath(int chunksToIgnore, out string typeName) {
+		string GetNamespaceAndTypeNameFromVirtualPath (int chunksToIgnore, out string typeName)
+		{
 
-         string fileName = (this.IsFileInCodeDir) ?
-            VirtualPathUtility.GetFileName(this.VirtualPath) :
-            this.AppRelativeVirtualPath.Remove(0, 2);
+			string fileName = (this.IsFileInCodeDir) ?
+            VirtualPathUtility.GetFileName (this.VirtualPath) :
+            this.AppRelativeVirtualPath.Remove (0, 2);
          
-         string[] strArray = fileName.Split(new char[] { '.', '/', '\\' });
-         int num = strArray.Length - chunksToIgnore;
+			string[] strArray = fileName.Split (new char[] { '.', '/', '\\' });
+			int num = strArray.Length - chunksToIgnore;
 
-         if (strArray[num - 1].Trim().Length == 0)
-            throw new HttpException(String.Format(CultureInfo.InvariantCulture, "The file name '{0}' is not supported.", fileName));
+			if (strArray [num - 1].Trim ().Length == 0)
+				throw new HttpException (String.Format (CultureInfo.InvariantCulture, "The file name '{0}' is not supported.", fileName));
 
-         typeName = MakeValidTypeNameFromString(
-            (this.IsFileInCodeDir) ? strArray[num - 1] :
-             String.Join("_", strArray, 0, num).ToLowerInvariant()
-         );
+			typeName = MakeValidTypeNameFromString (
+            (this.IsFileInCodeDir) ? strArray [num - 1] :
+             String.Join ("_", strArray, 0, num).ToLowerInvariant ()
+			);
 
-         if (!this.IsFileInCodeDir) return "ASP";
+			if (!this.IsFileInCodeDir)
+				return "ASP";
 
-         for (int i = 0; i < (num - 1); i++) {
-            if (strArray[i].Trim().Length == 0)
-               throw new HttpException(String.Format(CultureInfo.InvariantCulture, "The file name '{0}' is not supported.", fileName));
+			for (int i = 0; i < (num - 1); i++) {
+				if (strArray [i].Trim ().Length == 0)
+					throw new HttpException (String.Format (CultureInfo.InvariantCulture, "The file name '{0}' is not supported.", fileName));
 
-            strArray[i] = MakeValidTypeNameFromString(strArray[i]);
-         }
+				strArray [i] = MakeValidTypeNameFromString (strArray [i]);
+			}
 
-         return String.Join(".", strArray, 0, num - 1);
-      }
+			return String.Join (".", strArray, 0, num - 1);
+		}
 
-      string MakeValidTypeNameFromString(string s) {
+		string MakeValidTypeNameFromString (string s)
+		{
 
-         StringBuilder builder = new StringBuilder();
+			StringBuilder builder = new StringBuilder ();
 
-         for (int i = 0; i < s.Length; i++) {
-            if ((i == 0) && char.IsDigit(s[0]))
-               builder.Append('_');
+			for (int i = 0; i < s.Length; i++) {
+				if ((i == 0) && char.IsDigit (s [0]))
+					builder.Append ('_');
 
-            builder.Append(char.IsLetterOrDigit(s[i]) ? s[i] : '_');
-         }
-         return builder.ToString();
-      }
-   }
+				builder.Append (char.IsLetterOrDigit (s [i]) ? s [i] : '_');
+			}
+			return builder.ToString ();
+		}
+	}
 }

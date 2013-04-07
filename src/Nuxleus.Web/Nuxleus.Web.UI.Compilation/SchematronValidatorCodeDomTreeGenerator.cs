@@ -11,50 +11,50 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.CodeDom;
-using Nuxleus.Web.UI;
+using Nuxleus.Web.Page;
 using System.IO;
 using System.Xml;
 
-namespace Nuxleus.Web.UI.Compilation {
-   
-   public class SchematronValidatorCodeDomTreeGenerator : BaseCodeDomTreeGenerator {
+namespace Nuxleus.Web.UI.Compilation
+{
+	public class SchematronValidatorCodeDomTreeGenerator : BaseCodeDomTreeGenerator
+	{
       
-      readonly SchematronParser parser;
+		readonly SchematronParser parser;
 
-      public Uri ValidatorUri { get; set; }
+		public Uri ValidatorUri { get; set; }
       
-      public SchematronValidatorCodeDomTreeGenerator(SchematronParser parser) {
-         this.parser = parser;
-      }
+		public SchematronValidatorCodeDomTreeGenerator (SchematronParser parser)
+		{
+			this.parser = parser;
+		}
 
-      public override void BuildCodeDomTree(CodeCompileUnit compileUnit) {
+		public override void BuildCodeDomTree (CodeCompileUnit compileUnit)
+		{
          
-         CodeThisReferenceExpression @this = new CodeThisReferenceExpression();
-         CodeBaseReferenceExpression @base = new CodeBaseReferenceExpression();
-         CodeTypeReferenceExpression thisType = new CodeTypeReferenceExpression(new CodeTypeReference(GeneratedTypeName));
-         CodeTypeReference uriType = new CodeTypeReference(typeof(Uri));
+			CodeThisReferenceExpression @this = new CodeThisReferenceExpression ();
+			CodeBaseReferenceExpression @base = new CodeBaseReferenceExpression ();
+			CodeTypeReferenceExpression thisType = new CodeTypeReferenceExpression (new CodeTypeReference (GeneratedTypeName));
+			CodeTypeReference uriType = new CodeTypeReference (typeof(Uri));
 
-         CodeMemberField executableField = new CodeMemberField {
+			CodeMemberField executableField = new CodeMemberField {
             Name = "_Executable",
             Type = new CodeTypeReference(typeof(XsltExecutable)),
             Attributes = MemberAttributes.Private | MemberAttributes.Static
          };
 
-         // methods
+			// methods
 
-         // cctor
-         CodeTypeConstructor cctor = new CodeTypeConstructor {
+			// cctor
+			CodeTypeConstructor cctor = new CodeTypeConstructor {
             CustomAttributes = { 
                new CodeAttributeDeclaration(DebuggerNonUserCodeTypeReference)
             }
          };
 
-         CodeVariableDeclarationStatement procVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement procVar = new CodeVariableDeclarationStatement {
             Name = "proc",
             Type = new CodeTypeReference(typeof(IXsltProcessor)),
             InitExpression = new CodeIndexerExpression {
@@ -68,13 +68,13 @@ namespace Nuxleus.Web.UI.Compilation {
             } 
          };
 
-         CodeVariableDeclarationStatement sourceVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement sourceVar = new CodeVariableDeclarationStatement {
             Name = "source",
             Type = new CodeTypeReference(typeof(Stream)),
             InitExpression = new CodePrimitiveExpression(null)
          };
 
-         CodeVariableDeclarationStatement sourceUriVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement sourceUriVar = new CodeVariableDeclarationStatement {
             Name = "sourceUri",
             Type = uriType,
             InitExpression = new CodeObjectCreateExpression {
@@ -85,13 +85,13 @@ namespace Nuxleus.Web.UI.Compilation {
             }
          };
 
-         CodeVariableDeclarationStatement resolverVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement resolverVar = new CodeVariableDeclarationStatement {
             Name = "resolver",
             Type = new CodeTypeReference(typeof(XmlResolver)),
             InitExpression = new CodeObjectCreateExpression(typeof(XmlEmbeddedResourceResolver))
          };
 
-         CodeTryCatchFinallyStatement trySt = new CodeTryCatchFinallyStatement { 
+			CodeTryCatchFinallyStatement trySt = new CodeTryCatchFinallyStatement { 
             TryStatements = {
                new CodeAssignStatement {
                   Left = new CodeVariableReferenceExpression(sourceVar.Name),
@@ -113,21 +113,21 @@ namespace Nuxleus.Web.UI.Compilation {
             }
          };
 
-         CodeVariableDeclarationStatement optionsVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement optionsVar = new CodeVariableDeclarationStatement {
             Name = "options",
             Type = new CodeTypeReference(typeof(XsltCompileOptions)),
          };
-         optionsVar.InitExpression = new CodeObjectCreateExpression(optionsVar.Type);
+			optionsVar.InitExpression = new CodeObjectCreateExpression (optionsVar.Type);
 
-         trySt.TryStatements.Add(optionsVar);
-         trySt.TryStatements.Add(new CodeAssignStatement {
+			trySt.TryStatements.Add (optionsVar);
+			trySt.TryStatements.Add (new CodeAssignStatement {
             Left = new CodePropertyReferenceExpression {
                PropertyName = "BaseUri",
                TargetObject = new CodeVariableReferenceExpression(optionsVar.Name)
             },
             Right = new CodeVariableReferenceExpression(sourceUriVar.Name)
          });
-         trySt.TryStatements.Add(new CodeAssignStatement {
+			trySt.TryStatements.Add (new CodeAssignStatement {
             Left = new CodeFieldReferenceExpression {
                FieldName = executableField.Name,
                TargetObject = thisType
@@ -142,7 +142,7 @@ namespace Nuxleus.Web.UI.Compilation {
             )
          });
 
-         CodeConditionStatement disposeIf = new CodeConditionStatement {
+			CodeConditionStatement disposeIf = new CodeConditionStatement {
             Condition = new CodeBinaryOperatorExpression {
                Left = new CodeVariableReferenceExpression(sourceVar.Name),
                Operator = CodeBinaryOperatorType.IdentityInequality,
@@ -158,12 +158,18 @@ namespace Nuxleus.Web.UI.Compilation {
             }
          };
 
-         trySt.FinallyStatements.Add(disposeIf);
+			trySt.FinallyStatements.Add (disposeIf);
 
-         cctor.Statements.AddRange(new CodeStatement[] { procVar, sourceVar, sourceUriVar, resolverVar, trySt });
+			cctor.Statements.AddRange (new CodeStatement[] {
+                procVar,
+                sourceVar,
+                sourceUriVar,
+                resolverVar,
+                trySt
+            });
 
-         // ctor
-         CodeConstructor ctor = new CodeConstructor {
+			// ctor
+			CodeConstructor ctor = new CodeConstructor {
             Attributes = MemberAttributes.Public,
             CustomAttributes = { 
                new CodeAttributeDeclaration(DebuggerNonUserCodeTypeReference)
@@ -176,20 +182,20 @@ namespace Nuxleus.Web.UI.Compilation {
             }
          };
 
-         // class
-         CodeTypeDeclaration codeType = new CodeTypeDeclaration {
+			// class
+			CodeTypeDeclaration codeType = new CodeTypeDeclaration {
             Name = GeneratedTypeName,
             IsClass = true,
             BaseTypes = { typeof(SchematronXsltValidator) },
             Members = { cctor, ctor, executableField }
          };
 
-         CodeNamespace codeNamespace = new CodeNamespace {
+			CodeNamespace codeNamespace = new CodeNamespace {
             Name = GeneratedTypeNamespace,
             Types = { codeType }
          };
 
-         compileUnit.Namespaces.Add(codeNamespace);
-      }
-   }
+			compileUnit.Namespaces.Add (codeNamespace);
+		}
+	}
 }

@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.Globalization;
 using System.IO;
@@ -19,43 +18,48 @@ using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 using System.Xml.XPath;
-using Nuxleus.Web.UI;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.Mvc {
+namespace Nuxleus.Web.Mvc
+{
+	public class AtomicTalkView : BuildManagerCompiledView
+	{
 
-   public class AtomicTalkView : BuildManagerCompiledView {
+		public AtomicTalkView (ControllerContext controllerContext, string viewPath) 
+			: base(controllerContext, viewPath)
+		{
+		}
 
-      public AtomicTalkView(ControllerContext controllerContext, string viewPath) 
-         : base(controllerContext, viewPath) { }
+		protected override void RenderView (ViewContext viewContext, TextWriter writer, object instance)
+		{
 
-      protected override void RenderView(ViewContext viewContext, TextWriter writer, object instance) {
+			if (viewContext == null)
+				throw new ArgumentNullException ("viewContext");
 
-         if (viewContext == null) throw new ArgumentNullException("viewContext");
+			XsltPage page = instance as XsltPage;
 
-         XsltPage page = instance as XsltPage;
-         
-         if (page == null)
-            throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Compiled view '{0}' must inherit from {1}.", this.ViewPath, typeof(XsltPage).AssemblyQualifiedName));
+			if (page == null)
+				throw new InvalidOperationException (String.Format (CultureInfo.InvariantCulture, "Compiled view '{0}' must inherit from {1}.", this.ViewPath, typeof(XsltPage).AssemblyQualifiedName));
 
-         XsltRuntimeOptions options = new XsltRuntimeOptions();
+			XsltRuntimeOptions options = new XsltRuntimeOptions ();
 
-         page.SetIntrinsics(HttpContext.Current);
-         page.AddFileDependencies();
-         page.InitializeRuntimeOptions(options);
+			page.SetIntrinsics (HttpContext.Current);
+			page.AddFileDependencies ();
+			page.InitializeRuntimeOptions (options);
 
-         IXPathNavigable inputNode = page.Executable.Processor.ItemFactory.CreateDocument(viewContext.ViewData.Model);
+			IXPathNavigable inputNode = page.Executable.Processor.ItemFactory.CreateDocument (viewContext.ViewData.Model);
 
-         if (inputNode != null) {
-            if (options.InitialContextNode == null)
-               options.InitialTemplate = null;
+			if (inputNode != null) {
+				if (options.InitialContextNode == null)
+					options.InitialTemplate = null;
 
-            options.InitialContextNode = inputNode;
-         }
+				options.InitialContextNode = inputNode;
+			}
 
-         foreach (var item in viewContext.ViewData)
-            options.Parameters[new XmlQualifiedName(item.Key)] = item.Value;
+			foreach (var item in viewContext.ViewData)
+				options.Parameters [new XmlQualifiedName (item.Key)] = item.Value;
 
-         page.Render(viewContext.Writer, options);
-      }
-   }
+			page.Render (viewContext.Writer, options);
+		}
+	}
 }

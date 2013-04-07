@@ -26,25 +26,26 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">.\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <ReleaseVersion>0.9</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <ConsolePause>False</ConsolePause>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <ConsolePause>False</ConsolePause>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
@@ -796,6 +797,8 @@
     <Compile Include="App_Start\PreApplicationStartCode.cs" />
     <Compile Include="Nuxleus.Web.Mvc\App_Start\AtomicTalkViewEngine_AppStart.cs" />
     <Compile Include="Nuxleus.Web.Mvc\App_Start\PreApplicationStartCode.cs" />
+    <Compile Include="Nuxleus.Extension\ExtensionMethods\GenericExtensionMethods\GenericObjectClone.cs" />
+    <Compile Include="Nuxleus.Core\Interface\ICopyable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -807,6 +810,9 @@
     <Folder Include="Nuxleus.Web\Nuxleus.Web.System\" />
     <Folder Include="Nuxleus.Web\Nuxleus.Web.Session\" />
     <Folder Include="Nuxleus.Web.Mvc\App_Start\" />
+    <Folder Include="Nuxleus.Web\Nuxleus.Web.UI.Compilation\" />
+    <Folder Include="Nuxleus.Extension\ExtensionMethods\GenericExtensionMethods\" />
+    <Folder Include="Nuxleus.Core\Interface\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Nuxleus.Core\Configuration\App.config" />

@@ -11,28 +11,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.XPath;
-using Nuxleus.Web.UI;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.UI.Compilation {
-   
-   public class BindingExpressionContext {
+namespace Nuxleus.Web.UI.Compilation
+{
+	public class BindingExpressionContext
+	{
 
-      public BaseParser Parser { get; private set; }
-      public XPathNavigator BoundNode { get; private set; }
-      public string NodeName { get; set; }
-      public string Namespace { get; set; }
+		public BaseParser Parser { get; private set; }
 
-      internal bool AffectsXsltInitiation { get; set; }
+		public XPathNavigator BoundNode { get; private set; }
 
-      public BindingExpressionContext(BaseParser parser, XPathNavigator boundNode) {
+		public string NodeName { get; set; }
+
+		public string Namespace { get; set; }
+
+		internal bool AffectsXsltInitiation { get; set; }
+
+		public BindingExpressionContext (BaseParser parser, XPathNavigator boundNode)
+		{
          
-         this.Parser = parser;
-         this.BoundNode = boundNode;
-      }
-   }
+			this.Parser = parser;
+			this.BoundNode = boundNode;
+		}
+	}
 }

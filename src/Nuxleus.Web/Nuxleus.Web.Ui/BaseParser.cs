@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -21,176 +20,186 @@ using System.Linq;
 using System.Web;
 using System.Web.Hosting;
 using System.Xml;
-using System.Xml.XPath;
 using System.Text.RegularExpressions;
 
-namespace Nuxleus.Web.Page {
-   
-   public abstract class BaseParser {
+namespace Nuxleus.Web.Page
+{
+	public abstract class BaseParser
+	{
 
-      static readonly Regex AttributeParser = new Regex(@"[^\s]+[\s]*=[\s]*""[^""]*""|[^\s]+[\s]*=[\s]*'[^']*'");
+		static readonly Regex AttributeParser = new Regex (@"[^\s]+[\s]*=[\s]*""[^""]*""|[^\s]+[\s]*=[\s]*'[^']*'");
+		string _VirtualPath;
+		string _AppRelativeVirtualPath;
 
-      string _VirtualPath;
-      string _AppRelativeVirtualPath;
+		// input state
 
-      // input state
+		public string VirtualPath {
+			get { return _VirtualPath; }
+			set {
+				_VirtualPath = value;
+				_AppRelativeVirtualPath = null;
+			}
+		}
 
-      public string VirtualPath {
-         get { return _VirtualPath; }
-         set {
-            _VirtualPath = value;
-            _AppRelativeVirtualPath = null;
-         }
-      }
+		public string AppRelativeVirtualPath {
+			get {
+				if (_AppRelativeVirtualPath == null) {
+					if (VirtualPath == null)
+						throw new InvalidOperationException ("VirtualPath cannot be null");
+					_AppRelativeVirtualPath = VirtualPathUtility.ToAppRelative (VirtualPath);
+				}
+				return _AppRelativeVirtualPath;
+			}
+		}
 
-      public string AppRelativeVirtualPath {
-         get {
-            if (_AppRelativeVirtualPath == null) {
-               if (VirtualPath == null)
-                  throw new InvalidOperationException("VirtualPath cannot be null");
-               _AppRelativeVirtualPath = VirtualPathUtility.ToAppRelative(VirtualPath);
-            }
-            return _AppRelativeVirtualPath;
-         }
-      }
+		public Uri PhysicalPath { get; set; }
 
-      public Uri PhysicalPath { get; set; }
+		// output state
 
-      // output state
+		public string GeneratedTypeFullName { get; set; }
 
-      public string GeneratedTypeFullName { get; set; }
-      public string Language { get; set; }
+		public string Language { get; set; }
 
-      public abstract void Parse(TextReader source);
+		public abstract void Parse (TextReader source);
 
-      protected virtual Exception CreateParseException(string format, params object[] args) {
-         throw new HttpParseException(String.Format(CultureInfo.InvariantCulture, format, args));
-      }
+		protected virtual Exception CreateParseException (string format, params object[] args)
+		{
+			throw new HttpParseException (String.Format (CultureInfo.InvariantCulture, format, args));
+		}
 
-      protected virtual Exception CreateParseException(IXmlLineInfo lineInfo, string format, params object[] args) {
+		protected virtual Exception CreateParseException (IXmlLineInfo lineInfo, string format, params object[] args)
+		{
 
-         if (lineInfo != null && lineInfo.HasLineInfo())
-            return new HttpParseException(String.Format(CultureInfo.InvariantCulture, format, args), null, this.VirtualPath, null, lineInfo.LineNumber);
-         else
-            return new HttpParseException(String.Format(CultureInfo.InvariantCulture, format, args));
-      }
+			if (lineInfo != null && lineInfo.HasLineInfo ())
+				return new HttpParseException (String.Format (CultureInfo.InvariantCulture, format, args), null, this.VirtualPath, null, lineInfo.LineNumber);
+			else
+				return new HttpParseException (String.Format (CultureInfo.InvariantCulture, format, args));
+		}
       
-      protected string GetVirtualPathAttribute(IDictionary<string, string> attribs, string name, bool checkFileExists) {
+		protected string GetVirtualPathAttribute (IDictionary<string, string> attribs, string name, bool checkFileExists)
+		{
 
-         string str = GetNonEmptyAttribute(attribs, name);
+			string str = GetNonEmptyAttribute (attribs, name);
          
-         if (str != null) {
+			if (str != null) {
 
-            string combined;
+				string combined;
 
-            try {
-               combined = HostingEnvironment.VirtualPathProvider.CombineVirtualPaths(this.VirtualPath, str);
+				try {
+					combined = HostingEnvironment.VirtualPathProvider.CombineVirtualPaths (this.VirtualPath, str);
 
-            } catch (Exception ex) {
-               throw CreateParseException(ex.Message);
-            }
+				} catch (Exception ex) {
+					throw CreateParseException (ex.Message);
+				}
 
-            if (checkFileExists && !HostingEnvironment.VirtualPathProvider.FileExists(combined))
-               throw CreateParseException("The file '{0}' does not exist.", str);
+				if (checkFileExists && !HostingEnvironment.VirtualPathProvider.FileExists (combined))
+					throw CreateParseException ("The file '{0}' does not exist.", str);
 
-            return combined;
-         } else {
-            return null;
-         }
-      }
+				return combined;
+			} else {
+				return null;
+			}
+		}
 
-      protected string GetFullClassNameAttribute(IDictionary<string, string> attribs, string name) {
+		protected string GetFullClassNameAttribute (IDictionary<string, string> attribs, string name)
+		{
 
-         string value = GetNonEmptyNoWhitespaceAttribute(attribs, name);
+			string value = GetNonEmptyNoWhitespaceAttribute (attribs, name);
 
-         if (value != null) {
-            string[] nsArray = value.Split(new char[] { '.' });
+			if (value != null) {
+				string[] nsArray = value.Split (new char[] { '.' });
 
-            foreach (string str in nsArray) {
-               if (!CodeGenerator.IsValidLanguageIndependentIdentifier(str))
-                  throw CreateParseException("'{0}' is not a valid value for attribute '{1}'.", value, name);
-            }
-         }
+				foreach (string str in nsArray) {
+					if (!CodeGenerator.IsValidLanguageIndependentIdentifier (str))
+						throw CreateParseException ("'{0}' is not a valid value for attribute '{1}'.", value, name);
+				}
+			}
 
-         return value;
-      }
+			return value;
+		}
 
-      protected object GetEnumAttribute(IDictionary<string, string> attribs, string name, Type enumType) {
+		protected object GetEnumAttribute (IDictionary<string, string> attribs, string name, Type enumType)
+		{
 
-         string str = GetNonEmptyAttribute(attribs, name);
+			string str = GetNonEmptyAttribute (attribs, name);
 
-         if (str != null) {
-            try {
-               return Enum.Parse(enumType, str, true);
-            } catch (ArgumentException) {
-               string enumNames = String.Join(", ", Enum.GetNames(enumType));
-               throw CreateParseException("The '{0}' attribute must be one of the following values: {1}.", name, enumNames);
-            }
-         }
+			if (str != null) {
+				try {
+					return Enum.Parse (enumType, str, true);
+				} catch (ArgumentException) {
+					string enumNames = String.Join (", ", Enum.GetNames (enumType));
+					throw CreateParseException ("The '{0}' attribute must be one of the following values: {1}.", name, enumNames);
+				}
+			}
 
-         return null;
-      }
+			return null;
+		}
    
-      protected bool GetBooleanAttribute(IDictionary<string, string> attribs, string name, ref bool val) {
+		protected bool GetBooleanAttribute (IDictionary<string, string> attribs, string name, ref bool val)
+		{
 
-         string str = GetNonEmptyAttribute(attribs, name);
+			string str = GetNonEmptyAttribute (attribs, name);
 
-         if (str != null) {
-            try {
-               val = bool.Parse(str);
-            } catch {
-               throw CreateParseException("The '{0}' attribute must be set to 'true' or 'false'.", name);
-            }
-            return true;
-         }
-         return false;
-      }
+			if (str != null) {
+				try {
+					val = bool.Parse (str);
+				} catch {
+					throw CreateParseException ("The '{0}' attribute must be set to 'true' or 'false'.", name);
+				}
+				return true;
+			}
+			return false;
+		}
 
-      protected string GetNonEmptyNoWhitespaceAttribute(IDictionary<string, string> attribs, string name) {
+		protected string GetNonEmptyNoWhitespaceAttribute (IDictionary<string, string> attribs, string name)
+		{
 
-         string str = GetNonEmptyAttribute(attribs, name);
+			string str = GetNonEmptyAttribute (attribs, name);
 
-         if (str != null && ContainsWhiteSpace(str))
-            throw CreateParseException("The '{0}' attribute cannot contain any whitespace characters.", name);
+			if (str != null && ContainsWhiteSpace (str))
+				throw CreateParseException ("The '{0}' attribute cannot contain any whitespace characters.", name);
 
-         return str;
-      }
+			return str;
+		}
 
-      protected string GetNonEmptyAttribute(IDictionary<string, string> attribs, string name) {
+		protected string GetNonEmptyAttribute (IDictionary<string, string> attribs, string name)
+		{
 
-         string val;
+			string val;
 
-         if (attribs.TryGetValue(name, out val)) {
-            val = val.Trim();
+			if (attribs.TryGetValue (name, out val)) {
+				val = val.Trim ();
 
-            if (val.Length == 0)
-               throw CreateParseException("The '{0}' attribute cannot be an empty string.", name);
-         }
+				if (val.Length == 0)
+					throw CreateParseException ("The '{0}' attribute cannot be an empty string.", name);
+			}
 
-         return val;
-      }
+			return val;
+		}
 
-      protected bool ContainsWhiteSpace(string s) {
+		protected bool ContainsWhiteSpace (string s)
+		{
 
-         for (int i = s.Length - 1; i >= 0; i--) {
-            if (Char.IsWhiteSpace(s[i]))
-               return true;
-         }
+			for (int i = s.Length - 1; i >= 0; i--) {
+				if (Char.IsWhiteSpace (s [i]))
+					return true;
+			}
 
-         return false;
-      }
+			return false;
+		}
 
-      protected IDictionary<string, string> GetAttributes(string content) {
+		protected IDictionary<string, string> GetAttributes (string content)
+		{
 
-         return (from m in AttributeParser.Matches(content).Cast<Match>()
-                 let eqIndex = m.Value.IndexOf('=')
-                 let name = m.Value.Substring(0, eqIndex).Trim()
-                 let quotedValue = m.Value.Substring(eqIndex + 1).Trim()
-                 let encodedValue = quotedValue.Substring(1, quotedValue.Length - 2)
-                 let reader = XmlReader.Create(new StringReader(encodedValue), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment })
-                 let read = reader.Read()
+			return (from m in AttributeParser.Matches (content).Cast<Match> ()
+                 let eqIndex = m.Value.IndexOf ('=')
+                 let name = m.Value.Substring (0, eqIndex).Trim ()
+                 let quotedValue = m.Value.Substring (eqIndex + 1).Trim ()
+                 let encodedValue = quotedValue.Substring (1, quotedValue.Length - 2)
+                 let reader = XmlReader.Create (new StringReader (encodedValue), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment })
+                 let read = reader.Read ()
                  let value = reader.Value
-                 select new { name, value }).ToDictionary(m => m.name, m => m.value);
-      }
-   }
+                 select new { name, value }).ToDictionary (m => m.name, m => m.value);
+		}
+	}
 }

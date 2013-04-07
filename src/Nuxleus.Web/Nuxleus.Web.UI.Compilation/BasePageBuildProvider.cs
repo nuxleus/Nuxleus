@@ -11,35 +11,37 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Web.Compilation;
 using Nuxleus.Web.UI;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.UI.Compilation {
+namespace Nuxleus.Web.UI.Compilation
+{
+	[BuildProviderAppliesTo(BuildProviderAppliesTo.Web)]
+	public abstract class BasePageBuildProvider : BaseBuildProvider
+	{
 
-   [BuildProviderAppliesTo(BuildProviderAppliesTo.Web)]
-   public abstract class BasePageBuildProvider : BaseBuildProvider {
+		ICollection _VirtualPathDependencies;
 
-      ICollection _VirtualPathDependencies;
-
-      public override ICollection VirtualPathDependencies {
-         get {
-            if (_VirtualPathDependencies == null)
-               _VirtualPathDependencies = ((BasePageParser)base.Parser).SourceDependencies as ICollection ??
-                  base.VirtualPathDependencies;
+		public override ICollection VirtualPathDependencies {
+			get {
+				if (_VirtualPathDependencies == null)
+					_VirtualPathDependencies = ((BasePageParser)base.Parser).SourceDependencies as ICollection ??
+						base.VirtualPathDependencies;
             
-            return _VirtualPathDependencies;
-         }
-      }
+				return _VirtualPathDependencies;
+			}
+		}
 
-      public override void GenerateCode(AssemblyBuilder assemblyBuilder) {
+		public override void GenerateCode (AssemblyBuilder assemblyBuilder)
+		{
          
-         base.GenerateCode(assemblyBuilder);
-         assemblyBuilder.GenerateTypeFactory(this.GeneratedTypeFullName);
-      }
-   }
+			base.GenerateCode (assemblyBuilder);
+			assemblyBuilder.GenerateTypeFactory (this.GeneratedTypeFullName);
+		}
+	}
 }
