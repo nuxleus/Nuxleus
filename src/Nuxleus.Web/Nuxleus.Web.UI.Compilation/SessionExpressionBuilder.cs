@@ -11,138 +11,141 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Text;
 using System.Web;
 using System.Web.Configuration;
 using System.Xml;
 using System.Xml.XPath;
-using Nuxleus.Web.UI;
 using Nuxleus.Web.Module;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.UI.Compilation {
-   
-   public sealed class SessionExpressionBuilder : BindingExpressionBuilder {
+namespace Nuxleus.Web.UI.Compilation
+{
+	public sealed class SessionExpressionBuilder : BindingExpressionBuilder
+	{
+		internal const string Namespace = SessionModule.Namespace;
+		static readonly CodeTypeReference SessionModuleTypeReference;
 
-      internal const string Namespace = SessionModule.Namespace;
+		static SessionExpressionBuilder ()
+		{
+			SessionModuleTypeReference = new CodeTypeReference (typeof(SessionModule));
+		}
 
-      static readonly CodeTypeReference SessionModuleTypeReference;
+		public override BindingExpressionInfo ParseExpression (string expression, BindingExpressionContext context)
+		{
 
-      static SessionExpressionBuilder() {
-         SessionModuleTypeReference = new CodeTypeReference(typeof(SessionModule));
-      }
+			Uri uri = new Uri (expression, UriKind.RelativeOrAbsolute);
 
-      public override BindingExpressionInfo ParseExpression(string expression, BindingExpressionContext context) {
+			if (!uri.IsAbsoluteUri)
+				uri = new Uri (String.Concat (SessionModule.Prefix, ":", uri.OriginalString), UriKind.Absolute);
 
-         Uri uri = new Uri(expression, UriKind.RelativeOrAbsolute);
+			List<string> validValues = new List<string> () { bind.it };
 
-         if (!uri.IsAbsoluteUri)
-            uri = new Uri(String.Concat(SessionModule.Prefix, ":", uri.OriginalString), UriKind.Absolute);
+			string path = uri.AbsolutePath;
+			string nodeName = context.NodeName ?? context.BoundNode.Name;
 
-         List<string> validValues = new List<string>() { bind.it };
+			if (!validValues.Contains (path))
+				throw new ArgumentException (String.Format (CultureInfo.InvariantCulture, "The value of the '{0}' attribute must be one of these values: {1}.", nodeName, String.Join (", ", validValues.ToArray ())));
 
-         string path = uri.AbsolutePath;
-         string nodeName = context.NodeName ?? context.BoundNode.Name;
+			if (context.AffectsXsltInitiation)
+				throw new ArgumentException ("Cannot bind to session when the parameter affects XSLT initiation.");
 
-         if (!validValues.Contains(path))
-            throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "The value of the '{0}' attribute must be one of these values: {1}.", nodeName, String.Join(", ", validValues.ToArray())));
+			BasePageParser pageParser = context.Parser as BasePageParser;
 
-         if (context.AffectsXsltInitiation)
-            throw new ArgumentException("Cannot bind to session when the parameter affects XSLT initiation.");
+			if (path == bind.it && pageParser != null && pageParser.EnableSessionState == PagesEnableSessionState.False) 
+				throw new ArgumentException (
+					String.Format (CultureInfo.InvariantCulture, "Cannot bind to {0} because session state is disabled for this page. Try setting enable-session-state=\"true\" on the page processing instruction.", bind.it)
+				);
 
-         BasePageParser pageParser = context.Parser as BasePageParser;
+			NameValueCollection query = (uri.Query.Length > 1) ?
+				HttpUtility.ParseQueryString (uri.Query.Replace (';', '&')) :
+				new NameValueCollection ();
 
-         if (path == bind.it && pageParser != null && pageParser.EnableSessionState == PagesEnableSessionState.False) 
-            throw new ArgumentException(
-               String.Format(CultureInfo.InvariantCulture, "Cannot bind to {0} because session state is disabled for this page. Try setting enable-session-state=\"true\" on the page processing instruction.", bind.it)
-            );
+			BindingExpressionInfo exprInfo = new BindingExpressionInfo (expression) { 
+				ParsedObject = uri
+			};
 
-         NameValueCollection query = (uri.Query.Length > 1) ?
-            HttpUtility.ParseQueryString(uri.Query.Replace(';', '&')) :
-            new NameValueCollection();
+			if (query ["name"] != null) {
 
-         BindingExpressionInfo exprInfo = new BindingExpressionInfo(expression) { 
-            ParsedObject = uri
-         };
+				exprInfo.ParsedValues ["name"] = query ["name"];
+				query.Remove ("name");
 
-         if (query["name"] != null) {
+			} else {
 
-            exprInfo.ParsedValues["name"] = query["name"];
-            query.Remove("name");
+				XPathNavigator nav = context.BoundNode.Clone ();
+				nav.MoveToParent ();
 
-         } else {
+				if (nav.NodeType == XPathNodeType.Element && nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT)
+					exprInfo.ParsedValues ["name"] = nav.GetAttribute ("name", "");
+			}
 
-            XPathNavigator nav = context.BoundNode.Clone();
-            nav.MoveToParent();
+			if (query ["remove"] != null) {
 
-            if (nav.NodeType == XPathNodeType.Element && nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT)
-               exprInfo.ParsedValues["name"] = nav.GetAttribute("name", "");
-         }
+				switch (path) {
+				case bind.it:
+					exprInfo.ParsedValues ["remove"] = GetBooleanOrDefault (query ["remove"]);
+					query.Remove ("remove");
+					break;
 
-         if (query["remove"] != null) {
+				default:
+					throw new ArgumentException (
+						String.Format (CultureInfo.InvariantCulture, "The remove option is not valid for {0}.", path)
+					);
+				}
+			}
 
-            switch (path) {
-               case bind.it:
-                  exprInfo.ParsedValues["remove"] = GetBooleanOrDefault(query["remove"]);
-                  query.Remove("remove");
-                  break;
+			foreach (string key in query.AllKeys) 
+				exprInfo.ParsedValues.Add (key, query [key]);
 
-               default:
-                  throw new ArgumentException(
-                     String.Format(CultureInfo.InvariantCulture, "The remove option is not valid for {0}.", path)
-                  );
-            }
-         }
+			return exprInfo;
+		}
 
-         foreach (string key in query.AllKeys) 
-            exprInfo.ParsedValues.Add(key, query[key]);
+		public override CodeExpression GetCodeExpression (BindingExpressionInfo exprInfo)
+		{
 
-         return exprInfo;
-      }
+			IDictionary<string, object> options = exprInfo.ParsedValues;
+			Uri uri = (Uri)exprInfo.ParsedObject;
 
-      public override CodeExpression GetCodeExpression(BindingExpressionInfo exprInfo) {
+			string inputName = options.ContainsKey ("name") ? options ["name"].ToString () : null;
+			string path = uri.AbsolutePath;
 
-         IDictionary<string, object> options = exprInfo.ParsedValues;
-         Uri uri = (Uri)exprInfo.ParsedObject;
+			switch (path) {
+			case bind.it:
+				return GetSessionExpression (inputName, (bool)options ["remove"]);
 
-         string inputName = options.ContainsKey("name") ? options["name"].ToString() : null;
-         string path = uri.AbsolutePath;
+			default:
+				throw new ArgumentException (String.Format (CultureInfo.InvariantCulture, "Invalid path '{0}'.", path), "uri");
+			}
+		}
 
-         switch (path) {
-            case bind.it:
-               return GetSessionExpression(inputName, (bool)options["remove"]);
+		CodeExpression GetSessionExpression (string name, bool remove)
+		{
 
-            default:
-               throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Invalid path '{0}'.", path), "uri");
-         }
-      }
+			string method = remove ? "GetAndRemove" : "Get";
 
-      CodeExpression GetSessionExpression(string name, bool remove) {
+			return new CodeMethodInvokeExpression {
+				Method = new CodeMethodReferenceExpression {
+					MethodName = method,
+					TargetObject = new CodeTypeReferenceExpression(SessionModuleTypeReference)
+				},
+				Parameters = { 
+					new CodePrimitiveExpression(name)
+				}
+			};
+		}
 
-         string method = remove ? "GetAndRemove" : "Get";
+		bool GetBooleanOrDefault (string value)
+		{
+			return value != null ? XmlConvert.ToBoolean (value) : false;
+		}
 
-         return new CodeMethodInvokeExpression {
-            Method = new CodeMethodReferenceExpression {
-               MethodName = method,
-               TargetObject = new CodeTypeReferenceExpression(SessionModuleTypeReference)
-            },
-            Parameters = { 
-               new CodePrimitiveExpression(name)
-            }
-         };
-      }
-
-      bool GetBooleanOrDefault(string value) {
-         return value != null ? XmlConvert.ToBoolean(value) : false;
-      }
-
-      struct bind {
-         public const string it = "";
-      }
-   }
+		struct bind
+		{
+			public const string it = "";
+		}
+	}
 }

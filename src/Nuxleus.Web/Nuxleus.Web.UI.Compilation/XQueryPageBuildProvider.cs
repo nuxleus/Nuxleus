@@ -16,37 +16,43 @@ using System;
 using System.IO;
 using System.Web.Compilation;
 using Nuxleus.Web.Page;
+using Nuxleus.Web.UI.Compilation;
 
-namespace Nuxleus.Web.Page.Compilation {
+namespace Nuxleus.Web.Page.Compilation
+{
    
-   public class XQueryPageBuildProvider : BasePageBuildProvider {
+    public class XQueryPageBuildProvider : BasePageBuildProvider
+    {
 
-      public override void GenerateCode(AssemblyBuilder assemblyBuilder) {
+        public override void GenerateCode (AssemblyBuilder assemblyBuilder)
+        {
          
-         base.GenerateCode(assemblyBuilder);
+            base.GenerateCode (assemblyBuilder);
 
-         // test compilation
+            // test compilation
 
-         XQueryPageParser xqueryParser = (XQueryPageParser)Parser;
+            XQueryPageParser xqueryParser = (XQueryPageParser)Parser;
 
-         IXQueryProcessor proc = Processors.XQuery[xqueryParser.ProcessorName];
+            IXQueryProcessor proc = Processors.XQuery [xqueryParser.ProcessorName];
 
-         using (Stream source = this.OpenStream()) {
+            using (Stream source = this.OpenStream()) {
 
-            try {
-               proc.Compile(source, new XQueryCompileOptions { BaseUri = this.PhysicalPath } );
-            } catch (ProcessorException ex) {
-               throw CreateCompileException(ex);
+                try {
+                    proc.Compile (source, new XQueryCompileOptions { BaseUri = this.PhysicalPath });
+                } catch (ProcessorException ex) {
+                    throw CreateCompileException (ex);
+                }
             }
-         }
-      }
+        }
 
-      protected override BaseParser CreateParser() {
-         return new XQueryPageParser();
-      }
+        protected override BaseParser CreateParser ()
+        {
+            return new XQueryPageParser ();
+        }
 
-      protected override BaseCodeDomTreeGenerator CreateCodeDomTreeGenerator(BaseParser parser) {
-         return new XQueryPageCodeDomTreeGenerator((XQueryPageParser)parser);
-      }
-   }
+        protected override BaseCodeDomTreeGenerator CreateCodeDomTreeGenerator (BaseParser parser)
+        {
+            return new XQueryPageCodeDomTreeGenerator ((XQueryPageParser)parser);
+        }
+    }
 }

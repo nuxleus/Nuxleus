@@ -11,229 +11,239 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Text;
 using System.Web;
-using System.Web.Configuration;
 using System.Xml;
 using System.Xml.XPath;
-using Nuxleus.Web.UI;
 using Nuxleus.Web.Module;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.UI.Compilation {
-   
-   public sealed class RequestExpressionBuilder : BindingExpressionBuilder {
+namespace Nuxleus.Web.UI.Compilation
+{
+	public sealed class RequestExpressionBuilder : BindingExpressionBuilder
+	{
 
-      internal const string Namespace = RequestModule.Namespace;
+		internal const string Namespace = RequestModule.Namespace;
+		static readonly CodeTypeReference RequestModuleTypeReference;
 
-      static readonly CodeTypeReference RequestModuleTypeReference;
+		string nodeName;
 
-      static RequestExpressionBuilder() {
-         RequestModuleTypeReference = new CodeTypeReference(typeof(RequestModule));
-      }
+		static RequestExpressionBuilder ()
+		{
+			RequestModuleTypeReference = new CodeTypeReference (typeof(RequestModule));
+		}
 
-      public override BindingExpressionInfo ParseExpression(string expression, BindingExpressionContext context) {
+		public override BindingExpressionInfo ParseExpression (string expression, BindingExpressionContext context)
+		{
 
-         Uri uri = new Uri(expression, UriKind.RelativeOrAbsolute);
+			Uri uri = new Uri (expression, UriKind.RelativeOrAbsolute);
 
-         if (!uri.IsAbsoluteUri)
-            uri = new Uri(String.Concat(RequestModule.Prefix, ":", uri.OriginalString), UriKind.Absolute);
+			if (!uri.IsAbsoluteUri)
+				uri = new Uri (String.Concat (RequestModule.Prefix, ":", uri.OriginalString), UriKind.Absolute);
 
-         List<string> validValues = new List<string>() { 
-            bind.query, bind.cookie, bind.form, 
-            bind.header, bind.http_method
-         };
+			List<string> validValues = new List<string> () {
+				Bind.Query, Bind.Cookie, Bind.Form,
+				Bind.Header, Bind.HttpMethod
+			};
 
-         string path = uri.AbsolutePath;
-         string nodeName = context.NodeName ?? context.BoundNode.Name;
+			string path = uri.AbsolutePath;
 
-         if (!validValues.Contains(path))
-            throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "The value of the '{0}' attribute must be one of these values: {1}.", nodeName, String.Join(", ", validValues.ToArray())));
+			if (!validValues.Contains (path)) {
+				nodeName = context.NodeName ?? context.BoundNode.Name;
+				throw new ArgumentException (String.Format (CultureInfo.InvariantCulture, "The value of the '{0}' attribute must be one of these values: {1}.", nodeName, String.Join (", ", validValues.ToArray ())));
+			}
 
-         BasePageParser pageParser = context.Parser as BasePageParser;
+			BasePageParser pageParser = context.Parser as BasePageParser;
 
-         NameValueCollection query = (uri.Query.Length > 1) ?
-            HttpUtility.ParseQueryString(uri.Query.Replace(';', '&')) :
-            new NameValueCollection();
+			NameValueCollection query = (uri.Query.Length > 1) ?
+				HttpUtility.ParseQueryString (uri.Query.Replace (';', '&')) :
+					new NameValueCollection ();
 
-         BindingExpressionInfo exprInfo = new BindingExpressionInfo(expression) { 
-            ParsedObject = uri
-         };
+			BindingExpressionInfo exprInfo = new BindingExpressionInfo (expression) {
+				ParsedObject = uri
+			};
 
-         if (query["name"] != null) {
+			if (query ["name"] != null) {
 
-            exprInfo.ParsedValues["name"] = query["name"];
-            query.Remove("name");
+				exprInfo.ParsedValues ["name"] = query ["name"];
+				query.Remove ("name");
 
-         } else {
+			} else {
 
-            XPathNavigator nav = context.BoundNode.Clone();
-            nav.MoveToParent();
+				XPathNavigator nav = context.BoundNode.Clone ();
+				nav.MoveToParent ();
 
-            if (nav.NodeType == XPathNodeType.Element && nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT)
-               exprInfo.ParsedValues["name"] = nav.GetAttribute("name", "");
-         }
+				if (nav.NodeType == XPathNodeType.Element && nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT)
+					exprInfo.ParsedValues ["name"] = nav.GetAttribute ("name", "");
+			}
 
-         if (query["accept"] != null) {
+			if (query ["accept"] != null) {
 
-            switch (path) {
-               case bind.http_method:
-                  throw new ArgumentException(
-                     String.Format(CultureInfo.InvariantCulture, "When '{0}' is set to '{1}' use the '{2}' attribute instead of the 'accept' option.", XsltPageParser.page.bind_initial_template, bind.http_method, XsltPageParser.page.accept_verbs)
-                  );
-            }
+				switch (path) {
+				case Bind.HttpMethod:
+					throw new ArgumentException (
+						String.Format (CultureInfo.InvariantCulture, "When '{0}' is set to '{1}' use the '{2}' attribute instead of the 'accept' option.", XsltPageParser.page.bind_initial_template, Bind.HttpMethod, XsltPageParser.page.accept_verbs)
+					);
+				}
 
-            exprInfo.ParsedValues["accept"] = query["accept"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            query.Remove("accept");
-         
-         } else {
+				exprInfo.ParsedValues ["accept"] = query ["accept"].Split (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+				query.Remove ("accept");
+			} else {
 
-            if (context.AffectsXsltInitiation) {
+				if (context.AffectsXsltInitiation) {
 
-               if (path != bind.http_method) {
-                  
-                  throw new ArgumentException(
-                     String.Format(CultureInfo.InvariantCulture, "The 'accept' option is required for '{0}'. Try this: {1}?accept=[comma-separated template names]", XsltPageParser.page.bind_initial_template, path)
-                  );
-               
-               } else if (pageParser != null && pageParser.AcceptVerbs.Count == 0) {
+					if (path != Bind.HttpMethod) {
 
-                  throw new ArgumentException(
-                     String.Format(CultureInfo.InvariantCulture, "The '{0}' attribute is required when '{1}' is set to '{2}'.",XsltPageParser.page.accept_verbs, XsltPageParser.page.bind_initial_template, path)
-                  );
-               }
-            }
-         }
+						throw new ArgumentException (
+							String.Format (CultureInfo.InvariantCulture, "The 'accept' option is required for '{0}'. Try this: {1}?accept=[comma-separated template names]", XsltPageParser.page.bind_initial_template, path)
+						);
 
-         if (query["remove"] != null) {
+					}
+					if (pageParser != null && pageParser.AcceptVerbs.Count == 0) {
 
-            switch (path) {
-               case bind.cookie:
-                  exprInfo.ParsedValues["remove"] = GetBooleanOrDefault(query["remove"]);
-                  query.Remove("remove");
-                  break;
+						throw new ArgumentException (
+							String.Format (CultureInfo.InvariantCulture, "The '{0}' attribute is required when '{1}' is set to '{2}'.", XsltPageParser.page.accept_verbs, XsltPageParser.page.bind_initial_template, path)
+						);
+					}
+				}
+			}
 
-               default:
-                  throw new ArgumentException(
-                     String.Format(CultureInfo.InvariantCulture, "The remove option is not valid for {0}.", path)
-                  );
-            }
-         }
+			if (query ["remove"] != null) {
 
-         foreach (string key in query.AllKeys) 
-            exprInfo.ParsedValues.Add(key, query[key]);
+				switch (path) {
+				case Bind.Cookie:
+					exprInfo.ParsedValues ["remove"] = GetBooleanOrDefault (query ["remove"]);
+					query.Remove ("remove");
+					break;
 
-         return exprInfo;
-      }
+				default:
+					throw new ArgumentException (
+						String.Format (CultureInfo.InvariantCulture, "The remove option is not valid for {0}.", path)
+					);
+				}
+			}
 
-      public override CodeExpression GetCodeExpression(BindingExpressionInfo exprInfo) {
+			foreach (string key in query.AllKeys)
+				exprInfo.ParsedValues.Add (key, query [key]);
 
-         IDictionary<string, object> options = exprInfo.ParsedValues;
-         Uri uri = (Uri)exprInfo.ParsedObject;
+			return exprInfo;
+		}
 
-         string inputName = options.ContainsKey("name") ? options["name"].ToString() : null;
-         string path = uri.AbsolutePath;
+		public override CodeExpression GetCodeExpression (BindingExpressionInfo exprInfo)
+		{
 
-         switch (path) {
-            case bind.query:
-               return GetQueryExpression(inputName);
+			IDictionary<string, object> options = exprInfo.ParsedValues;
+			Uri uri = (Uri)exprInfo.ParsedObject;
 
-            case bind.form:
-               return GetFormExpression(inputName);
+			string inputName = options.ContainsKey ("name") ? options ["name"].ToString () : null;
+			string path = uri.AbsolutePath;
 
-            case bind.cookie:
-               return GetCookieExpression(inputName, (bool)options["remove"]);
+			switch (path) {
+			case Bind.Query:
+				return GetQueryExpression (inputName);
 
-            case bind.header:
-               return GetHeaderExpression(inputName);
+			case Bind.Form:
+				return GetFormExpression (inputName);
 
-            case bind.http_method:
-               return GetHttpMethodExpression();
+			case Bind.Cookie:
+				return GetCookieExpression (inputName, (bool)options ["remove"]);
 
-            default:
-               throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Invalid path '{0}'.", path), "uri");
-         }
-      }
+			case Bind.Header:
+				return GetHeaderExpression (inputName);
 
-      CodeExpression GetQueryExpression(string name) {
+			case Bind.HttpMethod:
+				return GetHttpMethodExpression ();
 
-         return new CodeMethodInvokeExpression {
-            Method = new CodeMethodReferenceExpression {
-               MethodName = "QueryString",
-               TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
-            },
-            Parameters = { 
-               new CodePrimitiveExpression(name)
-            }
-         };
-      }
+			default:
+				throw new ArgumentException (String.Format (CultureInfo.InvariantCulture, "Invalid path '{0}'.", path), "uri");
+			}
+		}
 
-      CodeExpression GetFormExpression(string name) {
+		CodeExpression GetQueryExpression (string name)
+		{
 
-         return new CodeMethodInvokeExpression {
-            Method = new CodeMethodReferenceExpression {
-               MethodName = "Form",
-               TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
-            },
-            Parameters = { 
-               new CodePrimitiveExpression(name)
-            }
-         };
-      }
+			return new CodeMethodInvokeExpression {
+				Method = new CodeMethodReferenceExpression {
+					MethodName = "QueryString",
+					TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
+				},
+				Parameters = {
+					new CodePrimitiveExpression(name)
+				}
+			};
+		}
 
-      CodeExpression GetCookieExpression(string name, bool remove) {
+		CodeExpression GetFormExpression (string name)
+		{
 
-         string method = remove ? "GetCookieAndRemove" : "GetCookie";
+			return new CodeMethodInvokeExpression {
+				Method = new CodeMethodReferenceExpression {
+					MethodName = "Form",
+					TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
+				},
+				Parameters = {
+					new CodePrimitiveExpression(name)
+				}
+			};
+		}
 
-         return new CodeMethodInvokeExpression {
-            Method = new CodeMethodReferenceExpression {
-               MethodName = method,
-               TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
-            },
-            Parameters = { 
-               new CodePrimitiveExpression(name)
-            }
-         };
-      }
+		CodeExpression GetCookieExpression (string name, bool remove)
+		{
 
-      CodeExpression GetHeaderExpression(string name) {
-         
-         return new CodeMethodInvokeExpression {
-            Method = new CodeMethodReferenceExpression {
-               MethodName = "Header",
-               TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
-            },
-            Parameters = { 
-               new CodePrimitiveExpression(name)
-            }
-         };
-      }
+			string method = remove ? "GetCookieAndRemove" : "GetCookie";
 
-      CodeExpression GetHttpMethodExpression() {
-         
-         return new CodeMethodInvokeExpression {
-            Method = new CodeMethodReferenceExpression {
-               MethodName = "HttpMethod",
-               TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
-            }
-         };
-      }
+			return new CodeMethodInvokeExpression {
+				Method = new CodeMethodReferenceExpression {
+					MethodName = method,
+					TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
+				},
+				Parameters = {
+					new CodePrimitiveExpression(name)
+				}
+			};
+		}
 
-      bool GetBooleanOrDefault(string value) {
-         return value != null ? XmlConvert.ToBoolean(value) : false;
-      }
+		CodeExpression GetHeaderExpression (string name)
+		{
 
-      struct bind {
-         public const string query = "query";
-         public const string form = "form";
-         public const string cookie = "cookie";
-         public const string header = "header";
-         public const string http_method = "http-method";
-      }
-   }
+			return new CodeMethodInvokeExpression {
+				Method = new CodeMethodReferenceExpression {
+					MethodName = "Header",
+					TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
+				},
+				Parameters = {
+					new CodePrimitiveExpression(name)
+				}
+			};
+		}
+
+		CodeExpression GetHttpMethodExpression ()
+		{
+
+			return new CodeMethodInvokeExpression {
+				Method = new CodeMethodReferenceExpression {
+					MethodName = "HttpMethod",
+					TargetObject = new CodeTypeReferenceExpression(RequestModuleTypeReference)
+				}
+			};
+		}
+
+		bool GetBooleanOrDefault (string value)
+		{
+			return value != null ? XmlConvert.ToBoolean (value) : false;
+		}
+
+		struct Bind
+		{
+			public const string Query = "query";
+			public const string Form = "form";
+			public const string Cookie = "cookie";
+			public const string Header = "header";
+			public const string HttpMethod = "http-method";
+		}
+	}
 }

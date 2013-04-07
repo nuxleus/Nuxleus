@@ -1,69 +1,85 @@
-﻿// Copyright 2009 Max Toro Q.
+﻿//
+// MediaTypes.cs
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Author:
+//       M. David Peterson <m.david@3rdandurban.com>
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Copyright (c) 2013 M. David Peterson
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE/ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+namespace Nuxleus.Web.Module.EXPath.HttpClient
+{
+	static class MediaTypes
+	{
 
-namespace Nuxleus.Web.Module.EXPath.HttpClient {
-   
-   static class MediaTypes {
+		public const string Html = "text/html";
+		public const string XHtml = "application/xhtml+xml";
+		const StringComparison Comparison = StringComparison.Ordinal;
 
-      public const string Html = "text/html";
-      public const string XHtml = "application/xhtml+xml";
-
-      const StringComparison Comparison = StringComparison.Ordinal;
-
-      public static bool IsXml(string mediaType) {
+		public static bool IsXml (string mediaType)
+		{
          
-         if (mediaType == null) throw new ArgumentNullException("mediaType");
+			if (mediaType == null)
+				throw new ArgumentNullException ("mediaType");
 
-         if (mediaType.Length < 6) return false;
+			if (mediaType.Length < 6)
+				return false;
 
-         switch (mediaType) {
-            case "text/xml":
-            case "application/xml":
-            case "text/xml-external-parsed-entity":
-            case "application/xml-external-parsed-entity":
-               return true;
+			switch (mediaType) {
+			case "text/xml":
+			case "application/xml":
+			case "text/xml-external-parsed-entity":
+			case "application/xml-external-parsed-entity":
+				return true;
 
-            default:
-               return mediaType.EndsWith("+xml", Comparison);
-         }
-      }
+			default:
+				return mediaType.EndsWith ("+xml", Comparison);
+			}
+		}
 
-      public static bool IsText(string mediaType) {
+		public static bool IsText (string mediaType)
+		{
          
-         if (mediaType == null) throw new ArgumentNullException("mediaType");
+			if (mediaType == null)
+				throw new ArgumentNullException ("mediaType");
          
-         return mediaType.StartsWith("text/", Comparison);
-      }
+			return mediaType.StartsWith ("text/", Comparison);
+		}
 
-      public static bool IsMultipart(string mediaType) {
+		public static bool IsMultipart (string mediaType)
+		{
 
-         if (mediaType == null) throw new ArgumentNullException("mediaType");
+			if (mediaType == null)
+				throw new ArgumentNullException ("mediaType");
 
-         return mediaType.StartsWith("multipart/", Comparison);
-      }
+			return mediaType.StartsWith ("multipart/", Comparison);
+		}
 
-      public static bool Equals(string mediaType1, string mediaType2) {
+		public static bool Equals (string mediaType1, string mediaType2)
+		{
          
-         if (mediaType1 == null) throw new ArgumentNullException("mediaType1");
-         if (mediaType2 == null) throw new ArgumentNullException("mediaType2");
+			if (mediaType1 == null)
+				throw new ArgumentNullException ("mediaType1");
+			if (mediaType2 == null)
+				throw new ArgumentNullException ("mediaType2");
 
-         return String.Equals(mediaType1, mediaType2, Comparison);
-      }
-   }
+			return String.Equals (mediaType1, mediaType2, Comparison);
+		}
+	}
 }

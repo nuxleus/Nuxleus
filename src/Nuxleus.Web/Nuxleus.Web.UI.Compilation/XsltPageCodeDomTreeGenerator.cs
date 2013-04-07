@@ -11,70 +11,71 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.CodeDom;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Hosting;
 using System.Xml;
 using System.Xml.XPath;
-using Nuxleus.Web.UI;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.UI.Compilation {
-   
-   public class XsltPageCodeDomTreeGenerator : BasePageCodeDomTreeGenerator {
+namespace Nuxleus.Web.UI.Compilation
+{
+	public class XsltPageCodeDomTreeGenerator : BasePageCodeDomTreeGenerator
+	{
 
-      readonly XsltPageParser parser;
-      CodeMemberField executableField;
-      CodeMemberField initialContextNodeField;
+		readonly XsltPageParser parser;
+		CodeMemberField executableField;
+		CodeMemberField initialContextNodeField;
+		Type _PageBaseClass;
 
-      Type _PageBaseClass;
+		protected override Type PageBaseClass {
+			get { return _PageBaseClass; }
+		}
 
-      protected override Type PageBaseClass {
-         get { return _PageBaseClass; }
-      }
+		public XsltPageCodeDomTreeGenerator (XsltPageParser parser)
+         : base(parser)
+		{
 
-      public XsltPageCodeDomTreeGenerator(XsltPageParser parser)
-         : base(parser) {
+			this.parser = parser;
+			_PageBaseClass = typeof(XsltPage);
+		}
 
-         this.parser = parser;
-         _PageBaseClass = typeof(XsltPage);
-      }
-
-      protected override void AddPageFields(CodeTypeMemberCollection members) {
+		protected override void AddPageFields (CodeTypeMemberCollection members)
+		{
          
-         base.AddPageFields(members);
+			base.AddPageFields (members);
 
-         executableField = new CodeMemberField { 
+			executableField = new CodeMemberField { 
             Name = "_Executable",
             Type = new CodeTypeReference(typeof(XsltExecutable)),
             Attributes = MemberAttributes.Private | MemberAttributes.Static
          };
-         members.Add(executableField);
+			members.Add (executableField);
 
-         if (parser.PageType == XsltPageType.AssociatedStylesheet) {
+			if (parser.PageType == XsltPageType.AssociatedStylesheet) {
             
-            initialContextNodeField = new CodeMemberField { 
+				initialContextNodeField = new CodeMemberField { 
                Name = "_initialContextNode",
                Type = new CodeTypeReference(typeof(IXPathNavigable)),
                Attributes = MemberAttributes.Private | MemberAttributes.Static
             };
 
-            members.Add(initialContextNodeField);
-         }
-      }
+				members.Add (initialContextNodeField);
+			}
+		}
 
-      protected override void AddPageTypeCtorStatements(CodeStatementCollection statements) {
+		protected override void AddPageTypeCtorStatements (CodeStatementCollection statements)
+		{
          
-         base.AddPageTypeCtorStatements(statements);
+			base.AddPageTypeCtorStatements (statements);
 
-         bool useInitialContextNode = initialContextNodeField != null;
-         CodeTypeReference uriType = new CodeTypeReference(typeof(Uri));
+			bool useInitialContextNode = initialContextNodeField != null;
+			CodeTypeReference uriType = new CodeTypeReference (typeof(Uri));
 
-         CodeVariableDeclarationStatement procVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement procVar = new CodeVariableDeclarationStatement {
             Name = "proc",
             Type = new CodeTypeReference(typeof(IXsltProcessor)),
             InitExpression = new CodeIndexerExpression {
@@ -88,19 +89,19 @@ namespace Nuxleus.Web.UI.Compilation {
             } 
          };
 
-         CodeVariableDeclarationStatement sourceVar = new CodeVariableDeclarationStatement { 
+			CodeVariableDeclarationStatement sourceVar = new CodeVariableDeclarationStatement { 
             Name = "source",
             Type = new CodeTypeReference(typeof(Stream)),
             InitExpression = new CodePrimitiveExpression(null)
          };
 
-         CodeVariableDeclarationStatement virtualPathVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement virtualPathVar = new CodeVariableDeclarationStatement {
             Name = "virtualPath",
             Type = new CodeTypeReference(typeof(String)),
             InitExpression = new CodePrimitiveExpression(VirtualPathUtility.ToAppRelative(this.parser.XsltVirtualPath))
          };
 
-         CodeVariableDeclarationStatement sourceUriVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement sourceUriVar = new CodeVariableDeclarationStatement {
             Name = "sourceUri",
             Type = uriType,
             InitExpression = new CodeObjectCreateExpression {
@@ -123,24 +124,29 @@ namespace Nuxleus.Web.UI.Compilation {
             }
          };
 
-         CodeVariableDeclarationStatement icnSourceVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement icnSourceVar = new CodeVariableDeclarationStatement {
             Name = "initialContextNodeSource",
             Type = new CodeTypeReference(typeof(Stream)),
             InitExpression = new CodePrimitiveExpression(null)
          };
 
-         statements.AddRange(new CodeStatement[] { procVar, sourceVar, virtualPathVar, sourceUriVar });
+			statements.AddRange (new CodeStatement[] {
+                procVar,
+                sourceVar,
+                virtualPathVar,
+                sourceUriVar
+            });
 
-         if (useInitialContextNode)
-            statements.Add(icnSourceVar);
+			if (useInitialContextNode)
+				statements.Add (icnSourceVar);
 
-         CodeVariableDeclarationStatement optionsVar = new CodeVariableDeclarationStatement {
+			CodeVariableDeclarationStatement optionsVar = new CodeVariableDeclarationStatement {
             Name = "options",
             Type = new CodeTypeReference(typeof(XsltCompileOptions)),
          };
-         optionsVar.InitExpression = new CodeObjectCreateExpression(optionsVar.Type);
+			optionsVar.InitExpression = new CodeObjectCreateExpression (optionsVar.Type);
 
-         CodeTryCatchFinallyStatement trySt = new CodeTryCatchFinallyStatement {
+			CodeTryCatchFinallyStatement trySt = new CodeTryCatchFinallyStatement {
             TryStatements = { 
                new CodeAssignStatement {
                   Left = new CodeVariableReferenceExpression(sourceVar.Name),
@@ -202,9 +208,9 @@ namespace Nuxleus.Web.UI.Compilation {
             }
          };
 
-         if (useInitialContextNode) {
+			if (useInitialContextNode) {
             
-            trySt.TryStatements.Add(new CodeAssignStatement {
+				trySt.TryStatements.Add (new CodeAssignStatement {
                Left = new CodeVariableReferenceExpression(icnSourceVar.Name),
                Right = new CodeCastExpression {
                   TargetType = new CodeTypeReference(typeof(Stream)),
@@ -228,7 +234,7 @@ namespace Nuxleus.Web.UI.Compilation {
                }
             });
 
-            CodeVariableDeclarationStatement icnOptVar = new CodeVariableDeclarationStatement {
+				CodeVariableDeclarationStatement icnOptVar = new CodeVariableDeclarationStatement {
                Name = "initialContextNodeOptions",
                Type = new CodeTypeReference(typeof(XmlParsingOptions)),
                InitExpression = new CodeObjectCreateExpression { 
@@ -236,9 +242,9 @@ namespace Nuxleus.Web.UI.Compilation {
                }
             };
 
-            trySt.TryStatements.Add(icnOptVar);
+				trySt.TryStatements.Add (icnOptVar);
 
-            trySt.TryStatements.Add(
+				trySt.TryStatements.Add (
                new CodeAssignStatement {
                   Left = new CodePropertyReferenceExpression { 
                      PropertyName = "BaseUri",
@@ -246,9 +252,9 @@ namespace Nuxleus.Web.UI.Compilation {
                   },
                   Right = new CodeVariableReferenceExpression(sourceUriVar.Name)
                }
-            );
+				);
 
-            trySt.TryStatements.Add(
+				trySt.TryStatements.Add (
                new CodeAssignStatement {
                   Left = new CodeFieldReferenceExpression(this.PageTypeReferenceExpression, initialContextNodeField.Name),
                   Right = new CodeMethodInvokeExpression {
@@ -267,9 +273,9 @@ namespace Nuxleus.Web.UI.Compilation {
                      }
                   }
                }
-            );
+				);
 
-            trySt.FinallyStatements.Add(new CodeConditionStatement {
+				trySt.FinallyStatements.Add (new CodeConditionStatement {
                Condition = new CodeBinaryOperatorExpression {
                   Left = new CodeVariableReferenceExpression(icnSourceVar.Name),
                   Operator = CodeBinaryOperatorType.IdentityInequality,
@@ -284,36 +290,38 @@ namespace Nuxleus.Web.UI.Compilation {
                   )
                }
             });
-         }
+			}
 
-         statements.Add(trySt);
-      }
+			statements.Add (trySt);
+		}
 
-      protected override void AddPageProperties(CodeTypeMemberCollection members) {
+		protected override void AddPageProperties (CodeTypeMemberCollection members)
+		{
          
-         base.AddPageProperties(members);
+			base.AddPageProperties (members);
 
-         CodeMemberProperty executableProperty = new CodeMemberProperty { 
+			CodeMemberProperty executableProperty = new CodeMemberProperty { 
             Name = "Executable",
             Type = executableField.Type,
             Attributes = MemberAttributes.Public | MemberAttributes.Override,
             HasSet = false,
             HasGet = true,
          };
-         executableProperty.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(PageTypeReferenceExpression, executableField.Name)));
+			executableProperty.GetStatements.Add (new CodeMethodReturnStatement (new CodeFieldReferenceExpression (PageTypeReferenceExpression, executableField.Name)));
 
-         members.Add(executableProperty);
-      }
+			members.Add (executableProperty);
+		}
 
-      protected override void AddPageMethods(CodeTypeMemberCollection members) {
+		protected override void AddPageMethods (CodeTypeMemberCollection members)
+		{
          
-         base.AddPageMethods(members);
+			base.AddPageMethods (members);
 
-         CodeVariableReferenceExpression optionsVar = new CodeVariableReferenceExpression { 
+			CodeVariableReferenceExpression optionsVar = new CodeVariableReferenceExpression { 
             VariableName = "options"
          };
 
-         CodeMemberMethod optionsInit = new CodeMemberMethod {
+			CodeMemberMethod optionsInit = new CodeMemberMethod {
             Name = "InitializeRuntimeOptions",
             Attributes = MemberAttributes.Public | MemberAttributes.Override,
             CustomAttributes = { 
@@ -327,12 +335,12 @@ namespace Nuxleus.Web.UI.Compilation {
             }
          };
 
-         AddInitializeRuntimeOptionsStatements(optionsInit.Statements, optionsVar);
+			AddInitializeRuntimeOptionsStatements (optionsInit.Statements, optionsVar);
 
-         if (optionsInit.Statements.Count > 0) {
+			if (optionsInit.Statements.Count > 0) {
 
-            optionsInit.Statements.Insert(0,
-               new CodeExpressionStatement(
+				optionsInit.Statements.Insert (0,
+               new CodeExpressionStatement (
                   new CodeMethodInvokeExpression {
                      Method = new CodeMethodReferenceExpression {
                         MethodName = "InitializeRuntimeOptions",
@@ -340,28 +348,29 @@ namespace Nuxleus.Web.UI.Compilation {
                      },
                      Parameters = { new CodeVariableReferenceExpression(optionsVar.VariableName) }
                   }
-               )
-            );
+				)
+				);
 
-            members.Add(optionsInit);
-         }
-      }
+				members.Add (optionsInit);
+			}
+		}
 
-      protected void AddInitializeRuntimeOptionsStatements(CodeStatementCollection statements, CodeVariableReferenceExpression optionsVar) {
+		protected void AddInitializeRuntimeOptionsStatements (CodeStatementCollection statements, CodeVariableReferenceExpression optionsVar)
+		{
          
-         // Initial template
-         //------------------------------------------------
+			// Initial template
+			//------------------------------------------------
 
-         BindingExpressionInfo bind = parser.InitialTemplateBinding;
-         XmlQualifiedName initialTempl = parser.InitialTemplate;
+			BindingExpressionInfo bind = parser.InitialTemplateBinding;
+			XmlQualifiedName initialTempl = parser.InitialTemplate;
 
-         if (bind != null || initialTempl != null) {
+			if (bind != null || initialTempl != null) {
 
-            CodeAssignStatement assignFromPrimitive = null;
+				CodeAssignStatement assignFromPrimitive = null;
 
-            if (initialTempl != null) {
+				if (initialTempl != null) {
 
-               assignFromPrimitive = new CodeAssignStatement {
+					assignFromPrimitive = new CodeAssignStatement {
                   Left = new CodePropertyReferenceExpression {
                      PropertyName = "InitialTemplate",
                      TargetObject = optionsVar
@@ -372,15 +381,15 @@ namespace Nuxleus.Web.UI.Compilation {
                      new CodePrimitiveExpression(initialTempl.Namespace)
                   )
                };
-            }
+				}
 
-            if (bind != null) {
+				if (bind != null) {
 
-               bool bindRequired = initialTempl == null;
+					bool bindRequired = initialTempl == null;
 
-               CodePrimitiveExpression paramName = new CodePrimitiveExpression(bind.ParsedValues.ContainsKey("name") ? bind.ParsedValues["name"] : bind.Expression);
+					CodePrimitiveExpression paramName = new CodePrimitiveExpression (bind.ParsedValues.ContainsKey ("name") ? bind.ParsedValues ["name"] : bind.Expression);
 
-               CodeVariableDeclarationStatement initialTemplVar = new CodeVariableDeclarationStatement {
+					CodeVariableDeclarationStatement initialTemplVar = new CodeVariableDeclarationStatement {
                   Name = "initialTempl",
                   Type = new CodeTypeReference(typeof(String)),
                   InitExpression = new CodeMethodInvokeExpression {
@@ -397,12 +406,12 @@ namespace Nuxleus.Web.UI.Compilation {
                   }
                };
 
-               if (bind.LineNumber > 0)
-                  initialTemplVar.LinePragma = new CodeLinePragma(this.parser.PhysicalPath.LocalPath, bind.LineNumber);
+					if (bind.LineNumber > 0)
+						initialTemplVar.LinePragma = new CodeLinePragma (this.parser.PhysicalPath.LocalPath, bind.LineNumber);
 
-               if (bind.ParsedValues.ContainsKey("accept")) {
+					if (bind.ParsedValues.ContainsKey ("accept")) {
 
-                  initialTemplVar.InitExpression = new CodeMethodInvokeExpression {
+						initialTemplVar.InitExpression = new CodeMethodInvokeExpression {
                      Method = new CodeMethodReferenceExpression {
                         MethodName = "CheckParamValues",
                         TargetObject = new CodeThisReferenceExpression()
@@ -413,9 +422,9 @@ namespace Nuxleus.Web.UI.Compilation {
                         new CodeArrayCreateExpression(typeof(string), ((string[])bind.ParsedValues["accept"]).Select(s => new CodePrimitiveExpression(s)).ToArray())
                      }
                   };
-               }
+					}
 
-               initialTemplVar.InitExpression = new CodeMethodInvokeExpression {
+					initialTemplVar.InitExpression = new CodeMethodInvokeExpression {
                   Method = new CodeMethodReferenceExpression {
                      MethodName = "AsString",
                      TargetObject = new CodeThisReferenceExpression()
@@ -425,9 +434,9 @@ namespace Nuxleus.Web.UI.Compilation {
                   }
                };
 
-               statements.Add(initialTemplVar);
+					statements.Add (initialTemplVar);
 
-               CodeAssignStatement assignFromVar = new CodeAssignStatement {
+					CodeAssignStatement assignFromVar = new CodeAssignStatement {
                   Left = new CodePropertyReferenceExpression {
                      PropertyName = "InitialTemplate",
                      TargetObject = optionsVar
@@ -443,11 +452,11 @@ namespace Nuxleus.Web.UI.Compilation {
                   )
                };
 
-               if (bindRequired) {
-                  statements.Add(assignFromVar);
-               } else {
+					if (bindRequired) {
+						statements.Add (assignFromVar);
+					} else {
 
-                  CodeConditionStatement ifStatement = new CodeConditionStatement {
+						CodeConditionStatement ifStatement = new CodeConditionStatement {
                      Condition = new CodeBinaryOperatorExpression {
                         Left = new CodeVariableReferenceExpression(initialTemplVar.Name),
                         Operator = CodeBinaryOperatorType.IdentityInequality,
@@ -457,22 +466,22 @@ namespace Nuxleus.Web.UI.Compilation {
                      FalseStatements = { assignFromPrimitive }
                   };
 
-                  statements.Add(ifStatement);
-               }
+						statements.Add (ifStatement);
+					}
 
-            } else {
-               statements.Add(assignFromPrimitive);
-            }
-         }
+				} else {
+					statements.Add (assignFromPrimitive);
+				}
+			}
 
-         // Initial context node
-         //------------------------------------------------
+			// Initial context node
+			//------------------------------------------------
 
-         if (initialContextNodeField != null || this.parser.PageType == XsltPageType.SimplifiedStylesheet) {
+			if (initialContextNodeField != null || this.parser.PageType == XsltPageType.SimplifiedStylesheet) {
 
-            if (initialContextNodeField != null) {
+				if (initialContextNodeField != null) {
 
-               statements.Add(
+					statements.Add (
                   new CodeAssignStatement {
                      Left = new CodePropertyReferenceExpression {
                         PropertyName = "InitialContextNode",
@@ -483,11 +492,11 @@ namespace Nuxleus.Web.UI.Compilation {
                         TargetObject = PageTypeReferenceExpression
                      }
                   }
-               );
+					);
 
-            } else {
+				} else {
 
-               statements.Add(
+					statements.Add (
                   new CodeAssignStatement {
                      Left = new CodePropertyReferenceExpression {
                         PropertyName = "InitialContextNode",
@@ -509,9 +518,9 @@ namespace Nuxleus.Web.UI.Compilation {
                         },
                      }
                   }
-               );
-            }
-         }
-      }
-   }
+					);
+				}
+			}
+		}
+	}
 }

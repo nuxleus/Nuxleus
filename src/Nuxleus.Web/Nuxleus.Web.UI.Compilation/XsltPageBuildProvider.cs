@@ -11,46 +11,44 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
 using System.Web.Compilation;
 using System.IO;
-using Nuxleus.Web.UI;
-using System.Xml;
+using Nuxleus.Web.Page;
 
-namespace Nuxleus.Web.UI.Compilation {
-   
-   public class XsltPageBuildProvider : BasePageBuildProvider {
+namespace Nuxleus.Web.UI.Compilation
+{
+	public class XsltPageBuildProvider : BasePageBuildProvider
+	{
 
-      public override void GenerateCode(AssemblyBuilder assemblyBuilder) {
+		public override void GenerateCode (AssemblyBuilder assemblyBuilder)
+		{
          
-         base.GenerateCode(assemblyBuilder);
+			base.GenerateCode (assemblyBuilder);
 
-         // test compilation
+			// test compilation
 
-         XsltPageParser pageParser = (XsltPageParser)this.Parser;
+			XsltPageParser pageParser = (XsltPageParser)this.Parser;
 
-         IXsltProcessor proc = Processors.Xslt[pageParser.ProcessorName];
+			IXsltProcessor proc = Processors.Xslt [pageParser.ProcessorName];
 
-         using (Stream source = this.OpenStream(pageParser.XsltVirtualPath)) {
+			using (Stream source = this.OpenStream(pageParser.XsltVirtualPath)) {
 
-            try {
-               proc.Compile(source, new XsltCompileOptions { BaseUri = pageParser.XsltPhysicalUri });
-            } catch (ProcessorException ex) {
-               throw CreateCompileException(ex);
-            }
-         }
-      }
+				try {
+					proc.Compile (source, new XsltCompileOptions { BaseUri = pageParser.XsltPhysicalUri });
+				} catch (ProcessorException ex) {
+					throw CreateCompileException (ex);
+				}
+			}
+		}
 
-      protected override BaseParser CreateParser() {
-         return new XsltPageParser();
-      }
+		protected override BaseParser CreateParser ()
+		{
+			return new XsltPageParser ();
+		}
 
-      protected override BaseCodeDomTreeGenerator CreateCodeDomTreeGenerator(BaseParser parser) {
-         return new XsltPageCodeDomTreeGenerator((XsltPageParser)parser);
-      }
-   }
+		protected override BaseCodeDomTreeGenerator CreateCodeDomTreeGenerator (BaseParser parser)
+		{
+			return new XsltPageCodeDomTreeGenerator ((XsltPageParser)parser);
+		}
+	}
 }

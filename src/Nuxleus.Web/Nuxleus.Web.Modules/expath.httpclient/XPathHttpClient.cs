@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,126 +21,131 @@ using System.Xml.XPath;
 using System.Web;
 using System.IO;
 
-namespace Nuxleus.Web.Module.EXPath.HttpClient {
+namespace Nuxleus.Web.Module.EXPath.HttpClient
+{
+	[XPathModule(Namespace, NamespaceBindings = new[] { Prefix, Namespace })]
+	public sealed class XPathHttpClient
+	{
+		public const string Namespace = "http://expath.org/ns/http-client";
+		internal const string Prefix = "http";
 
-   [XPathModule(Namespace, NamespaceBindings = new[] { Prefix, Namespace })]
-   public sealed class XPathHttpClient {
-      
-      public const string Namespace = "http://expath.org/ns/http-client";
-      internal const string Prefix = "http";
+		public static Func<TextReader, IXPathNavigable> HtmlParser { get; set; }
 
-      public static Func<TextReader, IXPathNavigable> HtmlParser { get; set; }
+		public XPathItemFactory ItemFactory { get; set; }
 
-      public XPathItemFactory ItemFactory { get; set; }
-      public XmlResolver Resolver { get; set; }
+		public XmlResolver Resolver { get; set; }
 
-      public XPathHttpClient() {
-         this.Resolver = new XmlDynamicResolver(Assembly.GetCallingAssembly());
-      }
+		public XPathHttpClient ()
+		{
+			this.Resolver = new XmlDynamicResolver (Assembly.GetCallingAssembly ());
+		}
 
-      [XPathFunction("send-request", "item()+", "element(http:request)?")]
-      public XPathItem[] SendRequest(XPathNavigator request) {
-         return SendRequest(request, null);
-      }
+		[XPathFunction("send-request", "item()+", "element(http:request)?")]
+		public XPathItem[] SendRequest (XPathNavigator request)
+		{
+			return SendRequest (request, null);
+		}
 
-      [XPathFunction("send-request", "item()+", "element(http:request)?", "xs:string?")]
-      public XPathItem[] SendRequest(XPathNavigator request, string href) {
-         return SendRequest(request, href, null);
-      }
+		[XPathFunction("send-request", "item()+", "element(http:request)?", "xs:string?")]
+		public XPathItem[] SendRequest (XPathNavigator request, string href)
+		{
+			return SendRequest (request, href, null);
+		}
 
-      [XPathFunction("send-request", "item()+", "element(http:request)?", "xs:string?", "item()*")]
-      public XPathItem[] SendRequest(XPathNavigator request, string href, IEnumerable<XPathItem> bodies) {
+		[XPathFunction("send-request", "item()+", "element(http:request)?", "xs:string?", "item()*")]
+		public XPathItem[] SendRequest (XPathNavigator request, string href, IEnumerable<XPathItem> bodies)
+		{
 
-         XPathItemFactory itemFactory = this.ItemFactory ?? HttpContext.Current.GetCurrentItemFactory();
+			XPathItemFactory itemFactory = this.ItemFactory ?? HttpContext.Current.GetCurrentItemFactory ();
 
-         if (itemFactory == null)
-            throw new InvalidOperationException("ItemFactory cannot be null.");
-         
-         int bodiesLength = bodies != null ? bodies.Count() : 0;
+			if (itemFactory == null)
+				throw new InvalidOperationException ("ItemFactory cannot be null.");
 
-         XPathHttpRequest xpathRequest;
+			int bodiesLength = bodies != null ? bodies.Count () : 0;
 
-         if (request == null) {
+			XPathHttpRequest xpathRequest;
 
-            if (String.IsNullOrEmpty(href))
-               throw new ArgumentException("href cannot be null or empty if request is null.", "href");
+			if (request == null) {
 
-            xpathRequest = new XPathHttpRequest { 
-               Method = WebRequestMethods.Http.Get,
-               Href = new Uri(href, UriKind.Absolute),
-               Resolver = this.Resolver,
-               ItemFactory = itemFactory
-            };
+				if (String.IsNullOrEmpty (href))
+					throw new ArgumentException ("href cannot be null or empty if request is null.", "href");
 
-            if (bodiesLength > 0)
-               throw new ArgumentException("Cannot use the bodies parameter when request is null.", "bodies");
+				xpathRequest = new XPathHttpRequest { 
+					Method = WebRequestMethods.Http.Get,
+					Href = new Uri(href, UriKind.Absolute),
+					Resolver = this.Resolver,
+					ItemFactory = itemFactory
+				};
 
-         } else {
+				if (bodiesLength > 0)
+					throw new ArgumentException ("Cannot use the bodies parameter when request is null.", "bodies");
 
-            xpathRequest = new XPathHttpRequest {
-               Resolver = this.Resolver,
-               ItemFactory = itemFactory
-            };
-            xpathRequest.ReadXml(request);
+			} else {
 
-            if (String.IsNullOrEmpty(href)) {
-               if (xpathRequest.Href == null)
-                  throw new ArgumentException("href cannot be null or empty if request.Href is null.", "href");
+				xpathRequest = new XPathHttpRequest {
+					Resolver = this.Resolver,
+					ItemFactory = itemFactory
+				};
+				xpathRequest.ReadXml (request);
 
-            } else {
-               xpathRequest.Href = new Uri(href);
-            }
+				if (String.IsNullOrEmpty (href)) {
+					if (xpathRequest.Href == null)
+						throw new ArgumentException ("href cannot be null or empty if request.Href is null.", "href");
 
-            if (xpathRequest.Body != null) {
+				} else {
+					xpathRequest.Href = new Uri (href);
+				}
 
-               if (bodiesLength > 0) {
-                  if (bodiesLength > 1)
-                     throw new ArgumentException("bodies must have a single item when request.Body is not null.", "bodies");
+				if (xpathRequest.Body != null) {
 
-                  xpathRequest.Body.Content = bodies.Single();
-               }
+					if (bodiesLength > 0) {
+						if (bodiesLength > 1)
+							throw new ArgumentException ("bodies must have a single item when request.Body is not null.", "bodies");
 
-            } else if (xpathRequest.Multipart != null) {
+						xpathRequest.Body.Content = bodies.Single ();
+					}
 
-               if (bodiesLength > 0) {
+				} else if (xpathRequest.Multipart != null) {
 
-                  if (bodiesLength != xpathRequest.Multipart.Items.Count)
-                     throw new ArgumentException("The number of items in bodies must match the multipart request bodies.", "bodies");
+					if (bodiesLength > 0) {
 
-                  for (int i = 0; i < xpathRequest.Multipart.Items.Count; i++) {
-                     XPathHttpMultipartItem item = xpathRequest.Multipart.Items[i];
+						if (bodiesLength != xpathRequest.Multipart.Items.Count)
+							throw new ArgumentException ("The number of items in bodies must match the multipart request bodies.", "bodies");
 
-                     if (item.Body != null)
-                        item.Body.Content = bodies.Skip(i).First();
-                  }
-               }
+						for (int i = 0; i < xpathRequest.Multipart.Items.Count; i++) {
+							XPathHttpMultipartItem item = xpathRequest.Multipart.Items [i];
 
-            } else if (bodiesLength > 0) {
-               throw new ArgumentException("If bodies is not empty request.Body or request.Multipart cannot be null.", "request");
-            }
-         }
+							if (item.Body != null)
+								item.Body.Content = bodies.Skip (i).First ();
+						}
+					}
 
-         XPathHttpResponse xpathResponse = xpathRequest.GetResponse();        
-         XPathNavigator responseEl = itemFactory.CreateElement(xpathResponse);
+				} else if (bodiesLength > 0) {
+					throw new ArgumentException ("If bodies is not empty request.Body or request.Multipart cannot be null.", "request");
+				}
+			}
 
-         List<XPathItem> result = new List<XPathItem>();
-         result.Add(responseEl);
+			XPathHttpResponse xpathResponse = xpathRequest.GetResponse ();        
+			XPathNavigator responseEl = itemFactory.CreateElement (xpathResponse);
 
-         if (xpathResponse.Body != null) {
+			List<XPathItem> result = new List<XPathItem> ();
+			result.Add (responseEl);
 
-            if (xpathResponse.Body.Content != null)
-               result.Add(xpathResponse.Body.Content);
+			if (xpathResponse.Body != null) {
 
-         } else if (xpathResponse.Multipart != null) {
+				if (xpathResponse.Body.Content != null)
+					result.Add (xpathResponse.Body.Content);
 
-            foreach (XPathHttpMultipartItem item in xpathResponse.Multipart.Items) {
+			} else if (xpathResponse.Multipart != null) {
 
-               if (item.Body.Content != null)
-                  result.Add(item.Body.Content);
-            }
-         }
+				foreach (XPathHttpMultipartItem item in xpathResponse.Multipart.Items) {
 
-         return result.ToArray();
-      }
-   }
+					if (item.Body.Content != null)
+						result.Add (item.Body.Content);
+				}
+			}
+
+			return result.ToArray ();
+		}
+	}
 }
