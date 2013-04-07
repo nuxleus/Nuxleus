@@ -11,7 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,632 +23,612 @@ using System.Web.Hosting;
 using System.Web.UI;
 using System.Xml;
 using System.Xml.XPath;
-using Nuxleus.Web.UI.Compilation;
+using Nuxleus.Web.Page.Compilation;
 
-namespace Nuxleus.Web.Page
-{
-	public class XsltPageParser : BasePageParser
-	{
+namespace Nuxleus.Web.Page {
+   
+   public class XsltPageParser : BasePageParser {
 
-		string _XsltVirtualPath;
-		Uri _XsltPhysicalUri;
-		string[] _ExpressionBuilderNamespaces;
-		List<string> visitedDocs = new List<string> ();
+      string _XsltVirtualPath;
+      Uri _XsltPhysicalUri;
+      string[] _ExpressionBuilderNamespaces;
+      List<string> visitedDocs = new List<string>();
 
-		string[] ExpressionBuilderNamespaces {
-			get {
-				if (_ExpressionBuilderNamespaces == null)
-					_ExpressionBuilderNamespaces = BindingExpressionBuilder.GetNamespaces ();
-				return _ExpressionBuilderNamespaces;
-			}
-		}
+      string[] ExpressionBuilderNamespaces {
+         get {
+            if (_ExpressionBuilderNamespaces == null)
+               _ExpressionBuilderNamespaces = BindingExpressionBuilder.GetNamespaces();
+            return _ExpressionBuilderNamespaces;
+         }
+      }
 
-		public string XsltVirtualPath {
-			get { return _XsltVirtualPath; }
-			set {
-				_XsltVirtualPath = value;
-				_XsltPhysicalUri = null;
-			}
-		}
+      public string XsltVirtualPath {
+         get { return _XsltVirtualPath; }
+         set {
+            _XsltVirtualPath = value;
+            _XsltPhysicalUri = null;
+         }
+      }
 
-		public Uri XsltPhysicalUri {
-			get {
-				if (_XsltPhysicalUri == null) {
-					if (XsltVirtualPath == null)
-						throw new InvalidOperationException ("XsltVirtualPath cannot be null");
-					_XsltPhysicalUri = new Uri (HostingEnvironment.MapPath (XsltVirtualPath), UriKind.Absolute);
-				}
-				return _XsltPhysicalUri;
-			}
-		}
+      public Uri XsltPhysicalUri {
+         get {
+            if (_XsltPhysicalUri == null) {
+               if (XsltVirtualPath == null)
+                  throw new InvalidOperationException("XsltVirtualPath cannot be null");
+               _XsltPhysicalUri = new Uri(HostingEnvironment.MapPath(XsltVirtualPath), UriKind.Absolute);
+            }
+            return _XsltPhysicalUri;
+         }
+      }
 
-		public XsltPageType PageType { get; set; }
+      public XsltPageType PageType { get; set; }
+      public XmlQualifiedName DocumentName { get; set; }
 
-		public XmlQualifiedName DocumentName { get; set; }
+      public XmlQualifiedName InitialTemplate { get; set; }
+      public BindingExpressionInfo InitialTemplateBinding { get; set; }
+      public string ProcessorName { get; set; }
 
-		public XmlQualifiedName InitialTemplate { get; set; }
+      protected XPathNavigator Navigator { get; private set; }
 
-		public BindingExpressionInfo InitialTemplateBinding { get; set; }
+      public override void Parse(TextReader source) {
 
-		public string ProcessorName { get; set; }
-
-		protected XPathNavigator Navigator { get; private set; }
-
-		public override void Parse (TextReader source)
-		{
-
-			XmlReaderSettings readerSettings = new XmlReaderSettings { 
+         XmlReaderSettings readerSettings = new XmlReaderSettings { 
             CloseInput = false,
             IgnoreComments = true,
             IgnoreWhitespace = true
          };
-			XmlReader reader = XmlReader.Create (source, readerSettings);
+         XmlReader reader = XmlReader.Create(source, readerSettings);
          
-			this.Navigator = new XPathDocument (reader).CreateNavigator ();
+         this.Navigator = new XPathDocument(reader).CreateNavigator();
 
-			XPathNavigator nav = this.Navigator;
+         XPathNavigator nav = this.Navigator;
 
-			// determine PageType
-			nav.MoveToChild (XPathNodeType.Element);
+         // determine PageType
+         nav.MoveToChild(XPathNodeType.Element);
 
-			this.DocumentName = new XmlQualifiedName (nav.Name, nav.NamespaceURI);
+         this.DocumentName = new XmlQualifiedName(nav.Name, nav.NamespaceURI);
 
-			string associatedStylesheetVirtualPath;
-			this.PageType = GetPageType (out associatedStylesheetVirtualPath);
+         string associatedStylesheetVirtualPath;
+         this.PageType = GetPageType(out associatedStylesheetVirtualPath);
 
-			nav.MoveToRoot ();
+         nav.MoveToRoot();
 
-			if (Processors.Xslt.Count == 0)
-				throw CreateParseException ("There are no XSLT processors registered to render this page.");
+         if (Processors.Xslt.Count == 0)
+            throw CreateParseException("There are no XSLT processors registered to render this page.");
 
-			this.ProcessorName = Processors.Xslt.DefaultProcessorName;
-			this.XsltVirtualPath = this.VirtualPath;
+         this.ProcessorName = Processors.Xslt.DefaultProcessorName;
+         this.XsltVirtualPath = this.VirtualPath;
 
-			switch (PageType) {
-			case XsltPageType.StandardStylesheet:
+         switch (PageType) {
+            case XsltPageType.StandardStylesheet:
                // default named template
-				this.InitialTemplate = new XmlQualifiedName ("main");
-				break;
+               this.InitialTemplate = new XmlQualifiedName("main");
+               break;
 
-			case XsltPageType.AssociatedStylesheet:
-				this.XsltVirtualPath = associatedStylesheetVirtualPath;
-				this.SourceDependencies.Add (this.XsltVirtualPath);
-				break;
+            case XsltPageType.AssociatedStylesheet:
+               this.XsltVirtualPath = associatedStylesheetVirtualPath;
+               this.SourceDependencies.Add(this.XsltVirtualPath);
+               break;
 
-			default:
-				break;
-			}
+            default:
+               break;
+         }
 
-			this.visitedDocs.Add (this.XsltVirtualPath);
+         this.visitedDocs.Add(this.XsltVirtualPath);
 
-			if (this.PagesSection != null) {
-				this.EnableSessionState = this.PagesSection.EnableSessionState;
-				this.ValidateRequest = this.PagesSection.ValidateRequest;
-			}
+         if (this.PagesSection != null) {
+            this.EnableSessionState = this.PagesSection.EnableSessionState;
+            this.ValidateRequest = this.PagesSection.ValidateRequest;
+         }
 
-			bool pageDone, outputCacheDone;
-			pageDone = outputCacheDone = false;
+         bool pageDone, outputCacheDone;
+         pageDone = outputCacheDone = false;
 
-			for (bool moved = nav.MoveToFirstChild(); moved; moved = nav.MoveToNext()) {
+         for (bool moved = nav.MoveToFirstChild(); moved; moved = nav.MoveToNext()) {
 
-				if (nav.NodeType == XPathNodeType.Element) {
-					if (this.PageType == XsltPageType.StandardStylesheet)
-						ParseDeclarations ();
+            if (nav.NodeType == XPathNodeType.Element) {
+               if (this.PageType == XsltPageType.StandardStylesheet)
+                  ParseDeclarations();
 
-				} else if (nav.NodeType == XPathNodeType.ProcessingInstruction) {
+            } else if (nav.NodeType == XPathNodeType.ProcessingInstruction) {
 
-					switch (nav.LocalName) {
-					case page.it:
-						if (pageDone)
-							goto non_unique;
-						ParsePagePI ();
-						pageDone = true;
-						break;
+               switch (nav.LocalName) {
+                  case page.it:
+                     if (pageDone) goto non_unique;
+                     ParsePagePI();
+                     pageDone = true;
+                     break;
 
-					case output_cache.it:
-						if (outputCacheDone)
-							goto non_unique;
-						this.OutputCache = ParseOutputCachePI ();
-						outputCacheDone = true;
-						break;
+                  case output_cache.it:
+                     if (outputCacheDone) goto non_unique;
+                     this.OutputCache = ParseOutputCachePI();
+                     outputCacheDone = true;
+                     break;
 
-					case reference.it:
-						ParseReferencePI ();
-						break;
+                  case reference.it:
+                     ParseReferencePI();
+                     break;
 
-					case import.it:
-						ParseImportPI ();
-						break;
+                  case import.it:
+                     ParseImportPI();
+                     break;
 
-					default:
-						continue;
-					}
+                  default:
+                     continue;
+               }
 
-					continue;
+               continue;
 
-					non_unique:
-					throw CreateParseException ("There can be only one '{0}' processing instruction.", nav.LocalName);
-				}
-			}
-		}
+            non_unique:
+               throw CreateParseException("There can be only one '{0}' processing instruction.", nav.LocalName);
+            }
+         }
+      }
 
-		IXPathNavigable OpenDocument (string virtualPath)
-		{
+      IXPathNavigable OpenDocument(string virtualPath) {
 
-			XmlReaderSettings readerSettings = new XmlReaderSettings {
+         XmlReaderSettings readerSettings = new XmlReaderSettings {
             IgnoreComments = true,
             IgnoreWhitespace = true
          };
-			string localPath = HostingEnvironment.MapPath (virtualPath);
+         string localPath = HostingEnvironment.MapPath(virtualPath);
 
-			using (TextReader source = File.OpenText(localPath)) 
-				return new XPathDocument (XmlReader.Create (source, readerSettings)); 
-		}
+         using (TextReader source = File.OpenText(localPath)) 
+            return new XPathDocument(XmlReader.Create(source, readerSettings)); 
+      }
 
-		protected XsltPageType GetPageType (out string associatedStylesheetVirtualPath)
-		{
+      protected XsltPageType GetPageType(out string associatedStylesheetVirtualPath) {
 
-			associatedStylesheetVirtualPath = null;
+         associatedStylesheetVirtualPath = null;
 
-			XPathNavigator nav = this.Navigator;
+         XPathNavigator nav = this.Navigator;
 
-			nav.MoveToRoot ();
+         nav.MoveToRoot();
          
-			bool xmlStyleDone = false;
+         bool xmlStyleDone = false;
 
-			for (bool moved = nav.MoveToChild(XPathNodeType.ProcessingInstruction); moved; moved = nav.MoveToNext()) {
-				switch (nav.LocalName) {
-				case xml_stylesheet.it:
-					IDictionary<string, string> styleAttr = GetAttributes (nav.Value);
-					string assocVirtualPath = GetAssociatedStylesheetVirtualPath (styleAttr);
+         for (bool moved = nav.MoveToChild(XPathNodeType.ProcessingInstruction); moved; moved = nav.MoveToNext()) {
+            switch (nav.LocalName) {
+               case xml_stylesheet.it:
+                  IDictionary<string, string> styleAttr = GetAttributes(nav.Value);
+                  string assocVirtualPath = GetAssociatedStylesheetVirtualPath(styleAttr);
 
-					if (assocVirtualPath != null) {
-						if (xmlStyleDone)
-							throw CreateParseException ("There can be only one '{0}' processing instruction.", nav.LocalName);
-						else {
-							associatedStylesheetVirtualPath = assocVirtualPath;
-							return XsltPageType.AssociatedStylesheet;
-						}
-					}
+                  if (assocVirtualPath != null) {
+                     if (xmlStyleDone)
+                        throw CreateParseException("There can be only one '{0}' processing instruction.", nav.LocalName);
+                     else {
+                        associatedStylesheetVirtualPath = assocVirtualPath;
+                        return XsltPageType.AssociatedStylesheet;
+                     }
+                  }
 
-					break;
-				default:
-					continue;
-				}
-			}
+                  break;
+               default:
+                  continue;
+            }
+         }
          
-			nav.MoveToRoot ();
-			nav.MoveToChild (XPathNodeType.Element);
+         nav.MoveToRoot();
+         nav.MoveToChild(XPathNodeType.Element);
 
-			if (nav.NamespaceURI == WellKnownNamespaces.XSLT)
-				return XsltPageType.StandardStylesheet;
-			else if (nav.HasAttributes && !String.IsNullOrEmpty (nav.GetAttribute ("version", WellKnownNamespaces.XSLT))) 
-				return XsltPageType.SimplifiedStylesheet;
+         if (nav.NamespaceURI == WellKnownNamespaces.XSLT)
+            return XsltPageType.StandardStylesheet;
 
-			throw CreateParseException ("xsl:version attribute is missing (xsl prefix bound to '{0}').", WellKnownNamespaces.XSLT);
-		}
+         else if (nav.HasAttributes && !String.IsNullOrEmpty(nav.GetAttribute("version", WellKnownNamespaces.XSLT))) 
+            return XsltPageType.SimplifiedStylesheet;
 
-		protected string GetAssociatedStylesheetVirtualPath (IDictionary<string, string> attribs)
-		{
+         throw CreateParseException("xsl:version attribute is missing (xsl prefix bound to '{0}').", WellKnownNamespaces.XSLT);
+      }
 
-			string href = GetVirtualPathAttribute (attribs, xml_stylesheet.href, true);
-			EnsureNonNull (href, xml_stylesheet.it, xml_stylesheet.href);
+      protected string GetAssociatedStylesheetVirtualPath(IDictionary<string, string> attribs) {
 
-			return href;
-		}
+         string href = GetVirtualPathAttribute(attribs, xml_stylesheet.href, true);
+         EnsureNonNull(href, xml_stylesheet.it, xml_stylesheet.href);
 
-		protected void ParsePagePI ()
-		{
+         return href;
+      }
 
-			XPathNavigator nav = this.Navigator;
+      protected void ParsePagePI() {
 
-			IDictionary<string, string> attribs = GetAttributes (nav.Value);
+         XPathNavigator nav = this.Navigator;
 
-			// language
-			string language = GetNonEmptyNoWhitespaceAttribute (attribs, page.language);
+         IDictionary<string, string> attribs = GetAttributes(nav.Value);
 
-			if (language != null)
-				this.Language = language;
+         // language
+         string language = GetNonEmptyNoWhitespaceAttribute(attribs, page.language);
 
-			// class-name
-			string className = GetFullClassNameAttribute (attribs, page.class_name);
+         if (language != null)
+            this.Language = language;
 
-			if (!String.IsNullOrEmpty (className))
-				this.GeneratedTypeFullName = className;
+         // class-name
+         string className = GetFullClassNameAttribute(attribs, page.class_name);
 
-			// content-type
-			string contentType = GetNonEmptyAttribute (attribs, page.content_type);
+         if (!String.IsNullOrEmpty(className))
+            this.GeneratedTypeFullName = className;
 
-			if (contentType != null)
-				this.ContentType = contentType;
+         // content-type
+         string contentType = GetNonEmptyAttribute(attribs, page.content_type);
 
-			// enable-session-state
-			object enableSs = GetEnumAttribute (attribs, page.enable_session_state, typeof(PagesEnableSessionState));
+         if (contentType != null)
+            this.ContentType = contentType;
 
-			if (enableSs != null)
-				this.EnableSessionState = (PagesEnableSessionState)enableSs;
+         // enable-session-state
+         object enableSs = GetEnumAttribute(attribs, page.enable_session_state, typeof(PagesEnableSessionState));
 
-			// validate-request
-			bool valReq = default(bool);
+         if (enableSs != null)
+            this.EnableSessionState = (PagesEnableSessionState)enableSs;
 
-			if (GetBooleanAttribute (attribs, page.validate_request, ref valReq))
-				this.ValidateRequest = valReq;
+         // validate-request
+         bool valReq = default(bool);
 
-			// accept-verbs
-			string acceptVerbs = GetNonEmptyAttribute (attribs, page.accept_verbs);
+         if (GetBooleanAttribute(attribs, page.validate_request, ref valReq))
+            this.ValidateRequest = valReq;
 
-			if (acceptVerbs != null) { 
-				string[] verbs = acceptVerbs.Split (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+         // accept-verbs
+         string acceptVerbs = GetNonEmptyAttribute(attribs, page.accept_verbs);
 
-				for (int i = 0; i < verbs.Length; i++)
-					this.AcceptVerbs.Add (verbs [i].Trim ());
-			}
+         if (acceptVerbs != null) { 
+            string[] verbs = acceptVerbs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-			// XSLT related attributes
+            for (int i = 0; i < verbs.Length; i++)
+               this.AcceptVerbs.Add(verbs[i].Trim());
+         }
 
-			XPathNavigator nav2 = nav.CreateNavigator ();
-			nav2.MoveToRoot ();
-			nav2.MoveToChild (XPathNodeType.Element);
+         // XSLT related attributes
+
+         XPathNavigator nav2 = nav.CreateNavigator();
+         nav2.MoveToRoot();
+         nav2.MoveToChild(XPathNodeType.Element);
          
-			IDictionary<string, string> namespacesInScope = nav2.GetNamespacesInScope (XmlNamespaceScope.All);
+         IDictionary<string, string> namespacesInScope = nav2.GetNamespacesInScope(XmlNamespaceScope.All);
 
-			// initial-template
-			string initialTempl = GetNonEmptyAttribute (attribs, page.initial_template);
+         // initial-template
+         string initialTempl = GetNonEmptyAttribute(attribs, page.initial_template);
 
-			if (initialTempl != null) {
+         if (initialTempl != null) {
 
-				if (this.PageType != XsltPageType.StandardStylesheet)
-					throw CreateParseException ("The '{0}' attribute can only be used on standard XSLT pages.", page.initial_template);
+            if (this.PageType != XsltPageType.StandardStylesheet)
+               throw CreateParseException("The '{0}' attribute can only be used on standard XSLT pages.", page.initial_template);
 
-				string itLocal = initialTempl;
-				string itNamespace = "";
+            string itLocal = initialTempl;
+            string itNamespace = "";
 
-				if (initialTempl.Contains (":")) {
-					string[] itParts = initialTempl.Split (':');
-					itLocal = itParts [1];
-					string itPrefix = itParts [0];
+            if (initialTempl.Contains(":")) {
+               string[] itParts = initialTempl.Split(':');
+               itLocal = itParts[1];
+               string itPrefix = itParts[0];
 
-					if (namespacesInScope.ContainsKey (itPrefix))
-						itNamespace = namespacesInScope [itPrefix];
-				}
+               if (namespacesInScope.ContainsKey(itPrefix))
+                  itNamespace = namespacesInScope[itPrefix];
+            }
 
-				this.InitialTemplate = new XmlQualifiedName (itLocal, itNamespace);
-			}
+            this.InitialTemplate = new XmlQualifiedName(itLocal, itNamespace);
+         }
 
-			// initial-template-binding
+         // initial-template-binding
 
-			string[] prefixes = this.ExpressionBuilderNamespaces.Where (n => namespacesInScope.Values.Contains (n)).Select (n => namespacesInScope.Where (pair => pair.Value == n).First ().Key).ToArray ();
+         string[] prefixes = this.ExpressionBuilderNamespaces.Where(n => namespacesInScope.Values.Contains(n)).Select(n => namespacesInScope.Where(pair => pair.Value == n).First().Key).ToArray();
 
-			if (prefixes.Length > 0) {
+         if (prefixes.Length > 0) {
 
-				string[] bindNames = prefixes.Select (p => String.Concat (p, ":", page.bind_initial_template)).ToArray ();
-				var bind = attribs.LastOrDefault (p => bindNames.Contains (p.Key));
+            string[] bindNames = prefixes.Select(p => String.Concat(p, ":", page.bind_initial_template)).ToArray();
+            var bind = attribs.LastOrDefault(p => bindNames.Contains(p.Key));
 
-				if (bind.Key != null) {
+            if (bind.Key != null) {
 
-					string name = bind.Key;
-					string ns = namespacesInScope [name.Split (':').First ()];
-					string initialTemplBind = GetNonEmptyAttribute (attribs, name);
+               string name = bind.Key;
+               string ns = namespacesInScope[name.Split(':').First()];
+               string initialTemplBind = GetNonEmptyAttribute(attribs, name);
 
-					if (initialTemplBind != null) {
+               if (initialTemplBind != null) {
 
-						if (this.PageType != XsltPageType.StandardStylesheet)
-							throw CreateParseException ("The '{0}' attribute can only be used on standard XSLT pages.", page.bind_initial_template);
+                  if (this.PageType != XsltPageType.StandardStylesheet)
+                     throw CreateParseException("The '{0}' attribute can only be used on standard XSLT pages.", page.bind_initial_template);
 
-						BindingExpressionContext exprBuilderContext = new BindingExpressionContext (this, nav.Clone ()) {
+                  BindingExpressionContext exprBuilderContext = new BindingExpressionContext(this, nav.Clone()) {
                      NodeName = page.bind_initial_template,
                      Namespace = ns,
                      AffectsXsltInitiation = true
                   };
 
-						try {
-							this.InitialTemplateBinding = BindingExpressionBuilder.ParseExpr (initialTemplBind, exprBuilderContext);
+                  try {
+                     this.InitialTemplateBinding = BindingExpressionBuilder.ParseExpr(initialTemplBind, exprBuilderContext);
 
-						} catch (Exception ex) {
-							throw CreateParseException (ex.Message);
-						}
+                  } catch (Exception ex) {
+                     throw CreateParseException(ex.Message);
+                  }
 
-						if (this.InitialTemplateBinding != null)
-							this.InitialTemplateBinding.LineNumber = ((IXmlLineInfo)nav).LineNumber;
-					}
-				}
-			}
+                  if (this.InitialTemplateBinding != null)
+                     this.InitialTemplateBinding.LineNumber = ((IXmlLineInfo)nav).LineNumber;
+               }
+            }
+         }
 
-			// processor
-			string processor = GetNonEmptyAttribute (attribs, page.processor);
+         // processor
+         string processor = GetNonEmptyAttribute(attribs, page.processor);
 
-			if (processor != null) {
+         if (processor != null) {
 
-				if (!Processors.Xslt.Names.Contains (processor))
-					throw CreateParseException ("The processor '{0}' is not registered.", processor);
+            if (!Processors.Xslt.Names.Contains(processor))
+               throw CreateParseException("The processor '{0}' is not registered.", processor);
 
-				this.ProcessorName = processor; 
-			}
-		}
+            this.ProcessorName = processor; 
+         }
+      }
 
-		protected OutputCacheParameters ParseOutputCachePI ()
-		{
+      protected OutputCacheParameters ParseOutputCachePI() {
 
-			XPathNavigator nav = this.Navigator;
+         XPathNavigator nav = this.Navigator;
 
-			IDictionary<string, string> attribs = GetAttributes (nav.Value);
+         IDictionary<string, string> attribs = GetAttributes(nav.Value);
 
-			OutputCacheParameters parameters = new OutputCacheParameters ();
+         OutputCacheParameters parameters = new OutputCacheParameters();
 
-			// location
-			object location = GetEnumAttribute (attribs, output_cache.location, typeof(OutputCacheLocation));
+         // location
+         object location = GetEnumAttribute(attribs, output_cache.location, typeof(OutputCacheLocation));
 
-			if (location != null)
-				parameters.Location = (OutputCacheLocation)location;
+         if (location != null)
+            parameters.Location = (OutputCacheLocation)location;
 
-			// cache-profile
-			parameters.CacheProfile = GetNonEmptyAttribute (attribs, output_cache.cache_profile);
+         // cache-profile
+         parameters.CacheProfile = GetNonEmptyAttribute(attribs, output_cache.cache_profile);
 
-			bool otherParamsRequired = parameters.Location != OutputCacheLocation.None 
-				&& String.IsNullOrEmpty (parameters.CacheProfile);
+         bool otherParamsRequired = parameters.Location != OutputCacheLocation.None 
+            && String.IsNullOrEmpty(parameters.CacheProfile);
 
-			// duration
-			string durationStr = GetNonEmptyAttribute (attribs, output_cache.duration);
+         // duration
+         string durationStr = GetNonEmptyAttribute(attribs, output_cache.duration);
 
-			if (otherParamsRequired)
-				EnsureNonNull (durationStr, output_cache.it, output_cache.duration);
+         if (otherParamsRequired)
+            EnsureNonNull(durationStr, output_cache.it, output_cache.duration);
 
-			if (durationStr != null) {
-				int duration;
+         if (durationStr != null) {
+            int duration;
 
-				if (!int.TryParse (durationStr, out duration) || duration <= 0)
-					throw CreateParseException ("The '{0}' attribute must be set to a positive integer value.", output_cache.duration);
-				else
-					parameters.Duration = duration; 
-			}
+            if (!int.TryParse(durationStr, out duration) || duration <= 0)
+               throw CreateParseException("The '{0}' attribute must be set to a positive integer value.", output_cache.duration);
+            else
+               parameters.Duration = duration; 
+         }
 
-			// vary-by-param
-			string varyByParam = GetNonEmptyAttribute (attribs, output_cache.vary_by_param);
+         // vary-by-param
+         string varyByParam = GetNonEmptyAttribute(attribs, output_cache.vary_by_param);
 
-			if (otherParamsRequired)
-				EnsureNonNull (varyByParam, output_cache.it, output_cache.vary_by_param);
+         if (otherParamsRequired)
+            EnsureNonNull(varyByParam, output_cache.it, output_cache.vary_by_param);
 
-			if (varyByParam != null) {
-				parameters.VaryByParam = String.Equals (varyByParam, "none", StringComparison.OrdinalIgnoreCase) ?
+         if (varyByParam != null) {
+            parameters.VaryByParam = String.Equals(varyByParam, "none", StringComparison.OrdinalIgnoreCase) ?
                null : varyByParam; 
-			}
+         }
 
-			// no-store
-			bool noStore = default(bool);
+         // no-store
+         bool noStore = default(bool);
 
-			if (GetBooleanAttribute (attribs, output_cache.no_store, ref noStore))
-				parameters.NoStore = noStore;
+         if (GetBooleanAttribute(attribs, output_cache.no_store, ref noStore))
+            parameters.NoStore = noStore;
 
-			// vary-by-header
-			parameters.VaryByHeader = GetNonEmptyAttribute (attribs, output_cache.vary_by_header);
+         // vary-by-header
+         parameters.VaryByHeader = GetNonEmptyAttribute(attribs, output_cache.vary_by_header);
 
-			// vary-by-custom
-			parameters.VaryByCustom = GetNonEmptyAttribute (attribs, output_cache.vary_by_custom);
+         // vary-by-custom
+         parameters.VaryByCustom = GetNonEmptyAttribute(attribs, output_cache.vary_by_custom);
 
-			// vary-by-content-encodings
-			parameters.VaryByContentEncoding = GetNonEmptyAttribute (attribs, output_cache.vary_by_content_encodings);
+         // vary-by-content-encodings
+         parameters.VaryByContentEncoding = GetNonEmptyAttribute(attribs, output_cache.vary_by_content_encodings);
 
-			return parameters;
-		}
+         return parameters;
+      }
 
-		protected void ParseReferencePI ()
-		{
+      protected void ParseReferencePI() {
 
-			IDictionary<string, string> attribs = GetAttributes (this.Navigator.Value);
+         IDictionary<string, string> attribs = GetAttributes(this.Navigator.Value);
 
-			string href = GetVirtualPathAttribute (attribs, reference.href, true);
-			EnsureNonNull (href, reference.it, reference.href);
+         string href = GetVirtualPathAttribute(attribs, reference.href, true);
+         EnsureNonNull(href, reference.it, reference.href);
 
-			if (!this.SourceDependencies.Contains (href))
-				this.SourceDependencies.Add (href);
-		}
+         if (!this.SourceDependencies.Contains(href))
+            this.SourceDependencies.Add(href);
+      }
 
-		protected void ParseImportPI ()
-		{
+      protected void ParseImportPI() {
 
-			XPathNavigator nav = this.Navigator;
+         XPathNavigator nav = this.Navigator;
          
-			IDictionary<string, string> attribs = GetAttributes (nav.Value);
+         IDictionary<string, string> attribs = GetAttributes(nav.Value);
 
-			string ns = GetNonEmptyAttribute (attribs, import.@namespace);
-			EnsureNonNull (ns, import.it, import.@namespace);
+         string ns = GetNonEmptyAttribute(attribs, import.@namespace);
+         EnsureNonNull(ns, import.it, import.@namespace);
 
-			IXmlLineInfo lineInfo = (IXmlLineInfo)nav;
+         IXmlLineInfo lineInfo = (IXmlLineInfo)nav;
 
-			this.Namespaces.Add (new ParsedValue<string> (ns, this.PhysicalPath.LocalPath, lineInfo.LineNumber));
-		}
+         this.Namespaces.Add(new ParsedValue<string>(ns, this.PhysicalPath.LocalPath, lineInfo.LineNumber));
+      }
 
-		protected void ParseDeclarations ()
-		{
+      protected void ParseDeclarations() {
 
-			XPathNavigator nav = this.Navigator;
+         XPathNavigator nav = this.Navigator;
          
-			bool movedToChildren = nav.MoveToFirstChild ();
+         bool movedToChildren = nav.MoveToFirstChild();
 
-			for (bool moved = movedToChildren; moved; moved = nav.MoveToNext()) {
+         for (bool moved = movedToChildren; moved; moved = nav.MoveToNext()) {
             
-				if (nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT) 
-					ParseParameter ();
-				else if ((nav.LocalName == "import" || nav.LocalName == "include") && nav.NamespaceURI == WellKnownNamespaces.XSLT)
-					ParseImportDeclaration (this.VirtualPath);
-			}
+            if (nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT) 
+               ParseParameter();
+            
+            else if ((nav.LocalName == "import" || nav.LocalName == "include") && nav.NamespaceURI == WellKnownNamespaces.XSLT)
+               ParseImportDeclaration(this.VirtualPath);
+         }
 
-			if (movedToChildren)
-				nav.MoveToParent ();
-		}
+         if (movedToChildren)
+            nav.MoveToParent();
+      }
 
-		protected void ParseImportDeclaration (string importingVirtualPath)
-		{
+      protected void ParseImportDeclaration(string importingVirtualPath) {
 
-			XPathNavigator nav = this.Navigator;
+         XPathNavigator nav = this.Navigator;
 
-			string href = nav.GetAttribute ("href", "");
+         string href = nav.GetAttribute("href", "");
 
-			Uri uri = null;
+         Uri uri = null;
 
-			try {
-				uri = new Uri (href, UriKind.RelativeOrAbsolute);
-			} catch (UriFormatException) {
-			}
+         try {
+            uri = new Uri(href, UriKind.RelativeOrAbsolute);
+         } catch (UriFormatException) { }
 
-			if (uri != null && !uri.IsAbsoluteUri) {
-				string virtualPath = null;
+         if (uri != null && !uri.IsAbsoluteUri) {
+            string virtualPath = null;
 
-				try {
-					virtualPath = VirtualPathUtility.Combine (importingVirtualPath, href);
-				} catch (HttpException) {
-				}
+            try {
+               virtualPath = VirtualPathUtility.Combine(importingVirtualPath, href);
+            } catch (HttpException) { }
 
-				if (virtualPath != null) {
+            if (virtualPath != null) {
 
-					string appRelVirtualPath = VirtualPathUtility.ToAppRelative (virtualPath);
+               string appRelVirtualPath = VirtualPathUtility.ToAppRelative(virtualPath);
 
-					bool isInCodeDir = appRelVirtualPath.Remove (0, 2)
-                  .Split ('/') [0]
-                  .Equals ("App_Code", StringComparison.OrdinalIgnoreCase);
+               bool isInCodeDir = appRelVirtualPath.Remove(0, 2)
+                  .Split('/')[0]
+                  .Equals("App_Code", StringComparison.OrdinalIgnoreCase);
 
-					if (!isInCodeDir && !this.SourceDependencies.Contains (virtualPath)) 
-						this.SourceDependencies.Add (virtualPath);
+               if (!isInCodeDir && !this.SourceDependencies.Contains(virtualPath)) 
+                  this.SourceDependencies.Add(virtualPath);
 
-					if (!visitedDocs.Contains (virtualPath)) {
-						visitedDocs.Add (virtualPath);
-						this.Navigator = OpenDocument (virtualPath).CreateNavigator ();
-						ParseNestedImportDeclarations (virtualPath);
-						this.Navigator = nav;
-					}
-				}
-			}
-		}
+               if (!visitedDocs.Contains(virtualPath)) {
+                  visitedDocs.Add(virtualPath);
+                  this.Navigator = OpenDocument(virtualPath).CreateNavigator();
+                  ParseNestedImportDeclarations(virtualPath);
+                  this.Navigator = nav;
+               }
+            }
+         }
+      }
 
-		protected void ParseNestedImportDeclarations (string importingVirtualPath)
-		{
+      protected void ParseNestedImportDeclarations(string importingVirtualPath) {
 
-			XPathNavigator nav = this.Navigator;
+         XPathNavigator nav = this.Navigator;
 
-			if (nav.MoveToChild (XPathNodeType.Element)) {
+         if (nav.MoveToChild(XPathNodeType.Element)) {
 
-				for (bool moved = nav.MoveToChild(XPathNodeType.Element); moved; moved = nav.MoveToNext(XPathNodeType.Element)) {
+            for (bool moved = nav.MoveToChild(XPathNodeType.Element); moved; moved = nav.MoveToNext(XPathNodeType.Element)) {
 
-					if (nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT)
-						ParseParameter ();
-					else if ((nav.LocalName == "import" || nav.LocalName == "include") && nav.NamespaceURI == WellKnownNamespaces.XSLT)
-						ParseImportDeclaration (importingVirtualPath);
-				}
-			}
-		}
+               if (nav.LocalName == "param" && nav.NamespaceURI == WellKnownNamespaces.XSLT)
+                  ParseParameter();
 
-		protected void ParseParameter ()
-		{
+               else if ((nav.LocalName == "import" || nav.LocalName == "include") && nav.NamespaceURI == WellKnownNamespaces.XSLT)
+                  ParseImportDeclaration(importingVirtualPath);
+            }
+         }
+      }
 
-			XPathNavigator nav = this.Navigator;
+      protected void ParseParameter() {
 
-			string nameValue = nav.GetAttribute ("name", "");
+         XPathNavigator nav = this.Navigator;
 
-			if (this.Parameters.Contains (nameValue))
-				return;
+         string nameValue = nav.GetAttribute("name", "");
 
-			PageParameterInfo paramInfo = null;
+         if (this.Parameters.Contains(nameValue))
+            return;
 
-			foreach (string ns in this.ExpressionBuilderNamespaces) {
+         PageParameterInfo paramInfo = null;
 
-				if (nav.MoveToAttribute ("bind", ns)) {
+         foreach (string ns in this.ExpressionBuilderNamespaces) {
 
-					BindingExpressionContext exprBuilderContext = new BindingExpressionContext (this, nav.Clone ());
+            if (nav.MoveToAttribute("bind", ns)) {
 
-					BindingExpressionInfo exprInfo = null;
+               BindingExpressionContext exprBuilderContext = new BindingExpressionContext(this, nav.Clone());
 
-					try {
-						exprInfo = BindingExpressionBuilder.ParseExpr (nav.Value, exprBuilderContext);
+               BindingExpressionInfo exprInfo = null;
 
-					} catch (Exception ex) {
-						throw CreateParseException (ex.Message);
-					}
+               try {
+                  exprInfo = BindingExpressionBuilder.ParseExpr(nav.Value, exprBuilderContext);
 
-					if (exprInfo != null)
-						exprInfo.LineNumber = ((IXmlLineInfo)nav).LineNumber;
+               } catch (Exception ex) {
+                  throw CreateParseException(ex.Message);
+               }
 
-					nav.MoveToParent ();
+               if (exprInfo != null)
+                  exprInfo.LineNumber = ((IXmlLineInfo)nav).LineNumber;
 
-					IDictionary<string, string> namespacesInScope = nav.GetNamespacesInScope (XmlNamespaceScope.All);
+               nav.MoveToParent();
 
-					bool hasDefaultValue = !String.IsNullOrEmpty (nav.GetAttribute ("select", ""));
-					string asValue = nav.GetAttribute ("as", "");
-					bool required = nav.GetAttribute ("required", "") == "yes";
+               IDictionary<string, string> namespacesInScope = nav.GetNamespacesInScope(XmlNamespaceScope.All);
 
-					paramInfo = PageParameterInfo.FromSequenceType (nameValue, asValue, namespacesInScope);
+               bool hasDefaultValue = !String.IsNullOrEmpty(nav.GetAttribute("select", ""));
+               string asValue = nav.GetAttribute("as", "");
+               bool required = nav.GetAttribute("required", "") == "yes";
 
-					if (hasDefaultValue) {
-						if (paramInfo.MinLength > 0)
-							paramInfo.MinLength = 0;
+               paramInfo = PageParameterInfo.FromSequenceType(nameValue, asValue, namespacesInScope);
 
-					} else if (required) {
-						if (paramInfo.MinLength == 0)
-							paramInfo.MinLength = 1;
-					}
+               if (hasDefaultValue) {
+                  if (paramInfo.MinLength > 0)
+                     paramInfo.MinLength = 0;
 
-					paramInfo.Binding = exprInfo;
-				}
-			}
+               } else if (required) {
+                  if (paramInfo.MinLength == 0)
+                     paramInfo.MinLength = 1;
+               }
 
-			if (paramInfo != null)
-				this.Parameters.Add (paramInfo);
-		}
+               paramInfo.Binding = exprInfo;
+            }
+         }
 
-		protected override Exception CreateParseException (string format, params object[] args)
-		{
-			return CreateParseException (this.Navigator as IXmlLineInfo, format, args);
-		}
+         if (paramInfo != null)
+            this.Parameters.Add(paramInfo);
+      }
 
-		protected void EnsureNonNull (object value, string procInstName, string name)
-		{
+      protected override Exception CreateParseException(string format, params object[] args) {
+         return CreateParseException(this.Navigator as IXmlLineInfo, format, args);
+      }
 
-			if (value == null)
-				throw CreateParseException ("The '{0}' processing instruction is missing a '{1}' attribute.", procInstName, name);
-		}
+      protected void EnsureNonNull(object value, string procInstName, string name) {
 
-		internal struct page
-		{
-			public const string it = "page";
-			public const string language = "language";
-			public const string class_name = "class-name";
-			public const string validate_request = "validate-request";
-			public const string enable_session_state = "enable-session-state";
-			public const string content_type = "content-type";
-			public const string accept_verbs = "accept-verbs";
-			public const string processor = "processor";
-			public const string initial_template = "initial-template";
-			public const string bind_initial_template = "bind-initial-template";
-		}
+         if (value == null)
+            throw CreateParseException("The '{0}' processing instruction is missing a '{1}' attribute.", procInstName, name);
+      }
 
-		struct output_cache
-		{
-			public const string it = "output-cache";
-			public const string duration = "duration";
-			public const string vary_by_param = "vary-by-param";
-			public const string location = "location";
-			public const string no_store = "no-store";
-			public const string cache_profile = "cache-profile";
-			public const string vary_by_header = "vary-by-header";
-			public const string vary_by_custom = "vary-by-custom";
-			public const string vary_by_content_encodings = "vary-by-content-encodings";
-		}
+      internal struct page {
+         public const string it = "page";
 
-		struct reference
-		{
-			public const string it = "reference";
-			public const string href = "href";
-		}
+         public const string language = "language";
+         public const string class_name = "class-name";
+         public const string validate_request = "validate-request";
+         public const string enable_session_state = "enable-session-state";
+         public const string content_type = "content-type";
+         public const string accept_verbs = "accept-verbs";
 
-		struct import
-		{
-			public const string it = "import";
-			public const string @namespace = "namespace";
-		}
+         public const string processor = "processor";
+         public const string initial_template = "initial-template";
+         public const string bind_initial_template = "bind-initial-template";
+      }
 
-		struct xml_stylesheet
-		{
-			public const string it = "xml-stylesheet";
-			public const string href = "href";
-		}
-	}
+      struct output_cache {
+         public const string it = "output-cache";
+
+         public const string duration = "duration";
+         public const string vary_by_param = "vary-by-param";
+         public const string location = "location";
+         public const string no_store = "no-store";
+         public const string cache_profile = "cache-profile";
+         public const string vary_by_header = "vary-by-header";
+         public const string vary_by_custom = "vary-by-custom";
+         public const string vary_by_content_encodings = "vary-by-content-encodings";
+      }
+
+      struct reference {
+         public const string it = "reference";
+         public const string href = "href";
+      }
+
+      struct import {
+         public const string it = "import";
+         public const string @namespace = "namespace";
+      }
+
+      struct xml_stylesheet {
+         public const string it = "xml-stylesheet";
+
+         public const string href = "href";
+      }
+   }
 }
