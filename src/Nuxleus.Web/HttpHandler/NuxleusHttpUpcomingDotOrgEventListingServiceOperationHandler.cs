@@ -52,7 +52,7 @@ namespace Nuxleus.Web.HttpHandler
             string backfill = "further";
             string upcomingEventQueryUri =
                 Uri.EscapeUriString(
-                    String.Format("http://upcoming.yahooapis.com/services/rest/?method=event.search&api_key={0}&location={1}&quick_date={2}&category_id={3}&flags={4}&sort={5}&backfill={6}",
+					String.Format("http://api.eventful.com/rest/events/search?app_key={0}&location={1}&date={2}&keywords=music&page_size=20",
                     m_yahooApiKey,
                     location,
                     quickDate,

@@ -77,7 +77,7 @@ namespace Nuxleus.Web.HttpHandler
 
             if (ip == "::1" || ip == "127.0.0.1")
                 //ip = GetLocalIPAddress();
-                ip = "99.89.54.217";
+				ip = "74.61.24.199";
 
             LatLongLocation location = new LatLongLocation(GetIPLocation(ip));
 
