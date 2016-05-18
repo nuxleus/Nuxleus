@@ -834,12 +834,12 @@
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\iso_svrl_for_xslt2.xsl" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\readme.txt" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-en.xhtml" />
-    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_abstract_expand.xsl" />
-    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_dsdl_include.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_abstract_expand1.xsl" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_dsdl_include1.xsl" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_schematron_message.xsl" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_schematron_skeleton_for_xslt1.xsl" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\iso_svrl_for_xslt1.xsl" />
-    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\readme.txt" />
+    <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt1\readme1.txt" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-de.xhtml" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-fr.xhtml" />
     <EmbeddedResource Include="Nuxleus.Web\Nuxleus.Web.Schematron\xslt2\sch-messages-cs.xhtml" />

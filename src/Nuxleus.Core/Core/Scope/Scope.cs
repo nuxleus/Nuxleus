@@ -21,17 +21,17 @@ namespace Nuxleus.Core
             }
         }
 
-        public Scope(params Scope[] others)
-        {
-            this.code = null;
-            if (others != null)
-            {
-                foreach (Scope other in others)
-                {
-                    AddCode(other.code);
-                }
-            }
-        }
+        //public Scope(params Scope[] others)
+        //{
+        //    this.code = null;
+        //    if (others != null)
+        //    {
+        //        foreach (Scope other in others)
+        //        {
+        //            AddCode(other.code);
+        //        }
+        //    }
+        //}
 
         Chain code;
 
