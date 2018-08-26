@@ -31,7 +31,8 @@ There are five primary pieces of the Nuxleus Project System Architecture,
  * AtomicXML: The Server-side Service-Oriented Atomic Operation Workflow Modeling Language
  * Atomictalk: The Client-side MVC-influenced Communication & Content Rendering Engine
  * Cherokee: A High Performance Highly Secure Multiplexing HTTP/S Server used inside every WiFi-enabled GoPro and used by NASA, the NSA and a myriad of other companies and government agencies.
-Latest Project News
+
+## Latest Project News
 
 The following is outdated and in desperate need of an update.
 
