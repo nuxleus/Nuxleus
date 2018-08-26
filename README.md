@@ -26,16 +26,16 @@ The Nuxleus Project platform is built on top of a system of simple XML messages 
 
 There are five primary pieces of the Nuxleus Project System Architecture,
 
-Nuxleus Core: The System Message Routing & Distribution Engine
-Xameleon: The Message Processing & Transformation Engine
-AtomicXML: The Server-side Service-Oriented Atomic Operation Workflow Modeling Language
-Atomictalk: The Client-side MVC-influenced Communication & Content Rendering Engine
-lighttpd: A Load Balancing HTTP Server
+ * Nuxleus Core: The System Message Routing & Distribution Engine
+ * Xameleon: The Message Processing & Transformation Engine
+ * AtomicXML: The Server-side Service-Oriented Atomic Operation Workflow Modeling Language
+ * Atomictalk: The Client-side MVC-influenced Communication & Content Rendering Engine
+ * Cherokee: A High Performance Highly Secure Multiplexing HTTP/S Server used inside every WiFi-enabled GoPro and used by NASA, the NSA and a myriad of other companies and government agencies.
 Latest Project News
 
 The following is outdated and in desperate need of an update.
 
 Monday, January 1st, 2007
 
-The first official preview release is now available. For now, please visit  http://www.oreillynet.com/xml/blog/2007/01/annnuxleus_the_nuxleus_project.html where you will find links to the various available downloads as well as an overview of what is include in this release.
+An archive of the first official preview release is available. https://web.archive.org/web/20130914074619/http://www.oreillynet.com/xml/blog/2007/01/annnuxleus_the_nuxleus_project.html
 
